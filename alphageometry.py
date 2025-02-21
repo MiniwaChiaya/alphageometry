@@ -189,6 +189,7 @@ def write_solution(g: gh.Graph, p: pr.Problem, out_file: str) -> None:
 
   solution += '==========================\n'
   logging.info(solution)
+  print(solution)
   if out_file:
     with open(out_file, 'w') as f:
       f.write(solution)

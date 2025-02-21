@@ -41,3 +41,6 @@ eqratio6 B A B C Q P Q R, eqangle6 B A B C Q P Q R, ncoll A B C => simtri* A B C
 eqratio6 B A B C Q P Q R, eqratio6 C A C B R P R Q, ncoll A B C, cong A B P Q => contri* A B C P Q R
 para a b c d, coll m a d, coll n b c, eqratio6 m a m d n b n c, sameside m a d n b c => para m n a b
 para a b c d, coll m a d, coll n b c, para m n a b => eqratio6 m a m d n b n c
+cyclic A B C D, coll P A B, coll P C D => eqratio P A P C P D P B
+coll P A B, coll P C D, ncoll A B C D, eqratio P A P C P D P B => cyclic A B C D
+cyclic A B C D, cyclic A B E F, cyclic C D E F, coll P A B, coll P C D => coll P E F

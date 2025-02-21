@@ -1,0 +1,3 @@
+cyclic A B C D, coll P A B, coll P C D => eqratio P A P C P D P B
+cyclic A B C D, cyclic A B E F, cyclic C D E F, coll P A B, coll P C D => coll P E F
+cyclic A B C D, cyclic A B E F, coll P A B, coll P C D, coll P E F => cyclic C D E F
