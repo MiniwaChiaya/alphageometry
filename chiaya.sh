@@ -9,9 +9,11 @@ DDAR_ARGS=(
   --rules_file=$(pwd)/rules.txt \
 );
 
-BATCH_SIZE=2
-BEAM_SIZE=2
-DEPTH=2
+SIZE=2
+
+BATCH_SIZE=$SIZE
+BEAM_SIZE=$SIZE
+DEPTH=$SIZE
 
 SEARCH_ARGS=(
   --beam_size=$BEAM_SIZE
@@ -39,14 +41,15 @@ INPUT_FILE=circle.txt
 python -m alphageometry \
 --alsologtostderr \
 --problems_file=$(pwd)/$INPUT_FILE \
---problem_name=example7_5 \
+--problem_name=example6_3 \
 --mode=alphageometry \
 "${DDAR_ARGS[@]}" \
 "${SEARCH_ARGS[@]}" \
 "${LM_ARGS[@]}" \
---out_file="./output/example7_5.txt"\
+--out_file="kirine.txt"\
 
-# for pro in $(cat $INPUT_FILE | grep "example"); 
+
+# for pro in $(cat $INPUT_FILE | grep "example6"); 
 # do
 #   echo "solve problem $pro$"
 #   python -m alphageometry \
@@ -57,7 +60,7 @@ python -m alphageometry \
 #   "${DDAR_ARGS[@]}" \
 #   "${SEARCH_ARGS[@]}" \
 #   "${LM_ARGS[@]}" \
-#   --out_file="./output/${pro}.txt"\
+#   --out_file="./output_old/${pro}.txt"\
 
 #   echo "finish problem $pro$"
 # done

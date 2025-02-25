@@ -23,13 +23,13 @@ a b c = triangle a b c; o = circle o a b c; h = orthocenter h a b c; d = on_line
 example7_10
 a b c = triangle a b c; h = orthocenter h a b c; o = circle o a b c; d = on_circle d o a, on_circle d a c; k = on_line k a d, on_circle k a b; l = on_line l b c, on_pline l k c d; m = midpoint m b c; n = foot n h a l; t = midpoint t a h ? coll m n t
 exercise7_1
-a b = segment a b; x = on_bline x a b; y = on_bline y a b; c = on_circle c x a; d = on_circle d y a, on_line d b c; e = on_circle e x a, on_line e d a; f = on_circle f y a, on_line f c a; o = cricle o a e f ? perp o b c d
+a b = segment a b; x = on_bline x a b; y = on_bline y a b; c = on_circle c x a; d = on_circle d y a, on_line d b c; e = on_circle e x a, on_line e d a; f = on_circle f y a, on_line f c a; o = circle o a e f ? perp o b c d
 exercise7_2
 a b c = segment a b c; d = foot d a b c; e = foot e b c a; f = foot f c a b; h = on_line h a d, on_line h b e; p = on_line p b e, on_line p d f; q = on_line q a b, on_tline q p b c; n = on_line n e q, on_line n a d ? cong a n a h
 exercise7_4
 a b c = triangle a b c; o = circle o a b c; i = circle i o b c; g = on_circle g i o; x = circle x a b g; y = circle y a c g; e = on_line e a c, on_circle e x a; f = on_line f a b, on_circle f y a; k = on_line k b e, on_line k c f; t = on_line t a k, on_line t b c ? coll t o g
 exercise7_5
-a b c = triangle a b c; o = cricle o a b c; d = on_circle d o a; e = on_line e a d, on_line e b c; m = midpoint m a d; n = midpoint n b c; w = circle w e m n; x = on_circle x o a, on_circle x w e; y = on_circle y o a, on_circle y w e; z = on_line z a b, on_line z c d ? coll x y z
+a b c = triangle a b c; o = circle o a b c; d = on_circle d o a; e = on_line e a d, on_line e b c; m = midpoint m a d; n = midpoint n b c; w = circle w e m n; x = on_circle x o a, on_circle x w e; y = on_circle y o a, on_circle y w e; z = on_line z a b, on_line z c d ? coll x y z
 exercise7_7
 a b c = triangle a b c; d e f i = incenter2 d e f i a b c; p = on_line p a d, on_circle p i d; q = on_line q e f, on_tline q p a d; x = on_line x d e, on_line x a q; y = on_line y d f, on_line y a q ? cong a x a y
 exercise7_8
@@ -51,7 +51,7 @@ a b = segment a b; o = on_bline o a b; p = on_bline p a b; c = on_tline c a a p,
 exercise7_15
 a b = segment a b; o = on_bline o a b; p = on_tline p a o a, on_tline p b o b; c = on_circle c o a; d = on_line d p c, on_circle d o a; e = on_pline e c p b, on_circle e o a; f = on_line f a e, on_line f p b; g = on_line g d e, on_line g p b ? cong g f g b
 example6_1
-a b c = triangle a b c; o = circle o a b c; P = free; a1 = on_line a1 a p, on_circle a1 o a; b1 = on_line b1 b p, on_circle b1 o b; c1 = on_line c1 c p, on_circle c1 o c; q = on_circle q o a; x = on_line x q a1, on_line x b c; y = on_line y q b1, on_line y a c; z = on_line z q c1, on_line z a b ? coll x y z
+a b c = triangle a b c; o = circle o a b c; p = free; a1 = on_line a1 a p, on_circle a1 o a; b1 = on_line b1 b p, on_circle b1 o b; c1 = on_line c1 c p, on_circle c1 o c; q = on_circle q o a; x = on_line x q a1, on_line x b c; y = on_line y q b1, on_line y a c; z = on_line z q c1, on_line z a b ? coll x y z
 example6_2
 a b = segment a b; o = midpoint o a b; p = on_tline p b o b; c = on_circle c o a; d = on_line d p c, on_circle d o a; e = on_line e a c, on_line e p o; f = on_line f a d, on_line f p o ? cong o e o f
 example6_3
