@@ -6,7 +6,7 @@ export PYTHONPATH=$PYTHONPATH:$MELIAD_PATH
 
 DDAR_ARGS=(
   --defs_file=$(pwd)/defs.txt \
-  --rules_file=$(pwd)/rules1.txt \
+  --rules_file=$(pwd)/rules.txt \
 );
 
 BATCH_SIZE=2
@@ -34,13 +34,30 @@ LM_ARGS=(
   --gin_param=Trainer.restore_state_variables=False
 );
 
+INPUT_FILE=circle.txt
 
 python -m alphageometry \
 --alsologtostderr \
---problems_file=$(pwd)/circle.txt \
---problem_name=radical_axis3 \
+--problems_file=$(pwd)/$INPUT_FILE \
+--problem_name=example7_5 \
 --mode=alphageometry \
 "${DDAR_ARGS[@]}" \
 "${SEARCH_ARGS[@]}" \
 "${LM_ARGS[@]}" \
---out_file="kirine.txt"
+--out_file="./output/example7_5.txt"\
+
+# for pro in $(cat $INPUT_FILE | grep "example"); 
+# do
+#   echo "solve problem $pro$"
+#   python -m alphageometry \
+#   --alsologtostderr \
+#   --problems_file=$(pwd)/$INPUT_FILE \
+#   --problem_name=${pro} \
+#   --mode=alphageometry \
+#   "${DDAR_ARGS[@]}" \
+#   "${SEARCH_ARGS[@]}" \
+#   "${LM_ARGS[@]}" \
+#   --out_file="./output/${pro}.txt"\
+
+#   echo "finish problem $pro$"
+# done

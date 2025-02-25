@@ -401,7 +401,6 @@ class Circle:
         self.center = self.radius = self.r2 = None
         return
         # raise ValueError('Circle without center need p1 p2 p3')
-
       l12 = _perpendicular_bisector(p1, p2)
       l23 = _perpendicular_bisector(p2, p3)
       center = line_line_intersection(l12, l23)
