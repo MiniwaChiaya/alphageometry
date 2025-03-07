@@ -1,0 +1,1 @@
+cong O A O B, cong O B O C, cong O C O D => cyclic A B C D

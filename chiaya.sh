@@ -6,7 +6,7 @@ export PYTHONPATH=$PYTHONPATH:$MELIAD_PATH
 
 DDAR_ARGS=(
   --defs_file=$(pwd)/defs.txt \
-  --rules_file=$(pwd)/rules.txt \
+  --rules_file=$(pwd)/rules1.txt \
 );
 
 SIZE=2
@@ -36,12 +36,12 @@ LM_ARGS=(
   --gin_param=Trainer.restore_state_variables=False
 );
 
-INPUT_FILE=circle.txt
+INPUT_FILE=pros2.txt
 
 python -m alphageometry \
 --alsologtostderr \
 --problems_file=$(pwd)/$INPUT_FILE \
---problem_name=example6_3 \
+--problem_name=test_ccc2pt \
 --mode=alphageometry \
 "${DDAR_ARGS[@]}" \
 "${SEARCH_ARGS[@]}" \

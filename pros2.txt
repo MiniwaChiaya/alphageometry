@@ -1,0 +1,6 @@
+test_circle
+a b c = triangle a b c; o = circle o a b c; d = on_tline d a b c, on_circle d o a ? cyclic a b c a
+test_ccc2p
+a b c = triangle a b c; o = circle o a b c; d = on_circle d o a; p = on_line p a b, on_line p c d ? eqratio p a p c p d p b
+test_ccc2pt
+a b c = triangle a b c; o = circle o a b c; p = on_line p b c, on_tline p a o a; d = on_circle d o a; e = on_line e p d, on_circle e o a ? eqratio p a p b p c p a

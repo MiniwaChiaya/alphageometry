@@ -27,6 +27,7 @@ import numericals as nm
 import problem as pr
 from problem import Dependency, EmptyDependency
 
+import itertools
 
 def intersect1(set1: set[Any], set2: set[Any]) -> Any:
   for x in set1:
@@ -442,6 +443,72 @@ def match_cyclic_eqangle(
     record.add((b, a, d, c))
     yield dict(zip('ABPQ', [a, b, c, d]))
 
+def match_cyclic2power(
+    g: gh.Graph,
+    g_matcher: Callable[str, list[tuple[gm.Point, ...]]],
+    theorem: pr.Theorem,
+) -> Generator[dict[str, gm.Point], None, None]:
+  """Match cyclic A B C D, coll P A B, coll P C D => eqratio P A P C P D P B"""
+  record = set()
+  for a,b,c,d in g_matcher('cyclic'):
+    debugname([a,b,c,d])
+    if (a,b,c,d) in record:
+      continue
+    points = [a,b,c,d]
+    perms = utils.perm4(points)
+    for p in perms:
+      record.add(p)
+    ab = g._get_line(a, b)
+    cd = g._get_line(c, d)
+    if ab and cd:
+      p1s = ab.neighbors(gm.Point, return_set=True)
+      p2s = cd.neighbors(gm.Point, return_set=True)
+      p = intersect1(p1s, p2s)
+      if p:
+        yield dict(zip('PABCD',[p,a,b,c,d]))
+    ac = g._get_line(a, c)
+    bd = g._get_line(b, d)
+    if ac and bd:
+      p1s = ac.neighbors(gm.Point, return_set=True)
+      p2s = bd.neighbors(gm.Point, return_set=True)
+      p = intersect1(p1s, p2s)
+      if p:
+        yield dict(zip('PABCD',[p,a,c,b,d]))
+    ad = g._get_line(a, d)
+    bc = g._get_line(b, c)
+    if ad and bc:
+      p1s = ad.neighbors(gm.Point, return_set=True)
+      p2s = bc.neighbors(gm.Point, return_set=True)
+      p = intersect1(p1s, p2s)
+      if p:
+        yield dict(zip('PABCD',[p,a,d,b,c]))
+
+def match_cyclic2power_tan(
+    g: gh.Graph,
+    g_matcher: Callable[str, list[tuple[gm.Point, ...]]],
+    theorem: pr.Theorem,
+) -> Generator[dict[str, gm.Point], None, None]:
+  """Match circle O A B C, perp O A A P, coll P B C => eqratio P A P B P C P A """
+  record = set()
+  for o,a,b,c in g.all_circles():
+    if (o,a) in record:
+      pass
+    bc = g._get_line(b,c)
+    if not bc:
+      continue
+    record.add((o,a))
+    debugname([o,a,b,c])
+    oa = g._get_line(o, a)
+    if not (oa and oa.val): 
+      continue
+    for l in a.neighbors(gm.Line):
+      if g.check_perpl(oa, l):
+        p1s = l.neighbors(gm.Point, return_set=True)
+        p2s = bc.neighbors(gm.Point, return_set=True)
+        p = intersect1(p1s, p2s)
+        if p:
+          yield dict(zip('OPABC', [o, p, a, b, c]))
+        break
 
 def rotate_simtri(
     a: gm.Point, b: gm.Point, c: gm.Point, x: gm.Point, y: gm.Point, z: gm.Point
@@ -775,7 +842,6 @@ def match_eqangle6_ncoll_cyclic(
     if nm.check_ncoll([x.num for x in [a, b, c, x]]):
       yield dict(zip('ABPQ', [b, c, a, x]))
 
-
 def match_all(
     name: str, g: gh.Graph
 ) -> Generator[tuple[gm.Point, ...], None, None]:
@@ -858,6 +924,7 @@ def match_generic(
     theorem: pr.Theorem
 ) -> Generator[dict[str, gm.Point], None, None]:
   """Match any generic rule that is not one of the above match_*() rules."""
+  debugname(theorem)
   clause2enum = {}
 
   clauses = []
@@ -933,6 +1000,8 @@ BUILT_IN_FNS = {
     'eqratio6_coll_ncoll_eqangle6': match_eqratio6_coll_ncoll_eqangle6,
     'eqangle6_coll_ncoll_eqratio6': match_eqangle6_coll_ncoll_eqratio6,
     'eqangle6_ncoll_cyclic': match_eqangle6_ncoll_cyclic,
+    'cyclic_coll_coll_eqratio': match_cyclic2power,
+    'circle_perp_coll_eqratio': match_cyclic2power_tan,
 }
 
 
@@ -1154,3 +1223,9 @@ def apply_derivations(
     for arg in args:
       applied += g.do_algebra(name, arg)
   return applied
+
+def debugname(ps):
+  if type(ps) is list:
+    print([p.name for p in ps])
+  else:
+    print(ps.name)

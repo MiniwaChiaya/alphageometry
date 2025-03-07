@@ -1,5 +1,2 @@
 cyclic A B C D, coll P A B, coll P C D => eqratio P A P C P D P B
-coll P A B, coll P C D, ncoll A B C D, eqratio P A P C P D P B => cyclic A B C D
-cyclic A B C D, cyclic A B E F, cyclic C D E F, coll P A B, coll P C D => coll P E F
-cyclic A B C D E F, coll G A B, coll G D E, coll H B C, coll H E F, coll I C D, coll I F A => coll G H I
-cyclic A B C D E, coll G A B, coll G D E, coll H B C, coll H E F, coll I C D, coll I F A, coll G H I => cyclic A B C D E F
+circle O A B C, perp O A A P, coll P B C => eqratio P A P B P C P A
