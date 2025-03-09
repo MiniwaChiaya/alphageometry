@@ -1,17 +1,24 @@
 
 ==========================
  * From theorem premises:
-A B C D E : Points
+A B C D E F G H I J : Points
 DB = DC [00]
 DA = DB [01]
-AE ⟂ AD [02]
-C,B,E are collinear [03]
+DE = DA [02]
+DF = DA [03]
+DG = DA [04]
+E,H,F are collinear [05]
+H,B,A are collinear [06]
+I,B,C are collinear [07]
+I,F,G are collinear [08]
+E,J,C are collinear [09]
+G,J,A are collinear [10]
 
  * Auxiliary Constructions:
 : Points
 
 
  * Proof steps:
-001. DB = DC [00] & DA = DB [01] ⇒  D is the circumcenter of \Delta ACB [04]
-002. D is the circumcenter of \Delta ACB [04] & AE ⟂ AD [02] & C,B,E are collinear [03] ⇒  EA:CE = BE:EA
+001. DF = DA [03] & DG = DA [04] & DE = DA [02] & DB = DC [00] & DA = DB [01] ⇒  B,F,G,E,C,A are concyclic [11]
+002. B,F,G,E,C,A are concyclic [11] & I,B,C are collinear [07] & I,F,G are collinear [08] & E,J,C are collinear [09] & G,J,A are collinear [10] & E,H,F are collinear [05] & H,B,A are collinear [06] ⇒  I,H,J are collinear
 ==========================

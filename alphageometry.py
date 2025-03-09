@@ -29,7 +29,6 @@ import lm_inference as lm
 import pretty as pt
 import problem as pr
 
-
 _GIN_SEARCH_PATHS = flags.DEFINE_list(
     'gin_search_paths',
     ['third_party/py/meliad/transformer/configs'],
@@ -605,7 +604,6 @@ def run_alphageometry(
 def main(_):
   global DEFINITIONS
   global RULES
-
   # definitions of terms used in our domain-specific language.
   DEFINITIONS = pr.Definition.from_txt_file(_DEFS_FILE.value, to_dict=True)
   # load inference rules used in DD.
@@ -650,3 +648,4 @@ def main(_):
 
 if __name__ == '__main__':
   app.run(main)
+

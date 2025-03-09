@@ -27,7 +27,7 @@ import numericals as nm
 import problem as pr
 from problem import Dependency, EmptyDependency
 
-import itertools
+import time
 
 def intersect1(set1: set[Any], set2: set[Any]) -> Any:
   for x in set1:
@@ -53,6 +53,22 @@ def diff_point(l: gm.Line, a: gm.Point) -> gm.Point:
       return x
   return None
 
+import time
+
+def measure_time(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time() 
+        
+        result = func(*args, **kwargs)
+        
+        end_time = time.time()
+        elapsed_time = end_time - start_time 
+        
+        print(f"Function '{func.__name__}' took {elapsed_time:.9f} seconds to complete.")
+        
+        return result
+    
+    return wrapper
 
 # pylint: disable=protected-access
 # pylint: disable=unused-argument
@@ -462,7 +478,6 @@ def match_cyclic2power(
   """Match cyclic A B C D, coll P A B, coll P C D => eqratio P A P C P D P B"""
   record = set()
   for a,b,c,d in g_matcher('cyclic'):
-    debugname([a,b,c,d])
     if (a,b,c,d) in record:
       continue
     points = [a,b,c,d]
@@ -500,15 +515,10 @@ def match_cyclic2power_tan(
     theorem: pr.Theorem,
 ) -> Generator[dict[str, gm.Point], None, None]:
   """Match circle O A B C, perp O A A P, coll P B C => eqratio P A P B P C P A """
-  record = set()
   for o,a,b,c in g.all_circles():
-    if (o,a) in record:
-      pass
     bc = g._get_line(b,c)
     if not bc:
       continue
-    record.add((o,a))
-    debugname([o,a,b,c])
     oa = g._get_line(o, a)
     if not (oa and oa.val): 
       continue
@@ -521,32 +531,6 @@ def match_cyclic2power_tan(
           yield dict(zip('OPABC', [o, p, a, b, c]))
         break
 
-def match_cyclic2power_tan(
-    g: gh.Graph,
-    g_matcher: Callable[str, list[tuple[gm.Point, ...]]],
-    theorem: pr.Theorem,
-) -> Generator[dict[str, gm.Point], None, None]:
-  """Match circle O A B C, perp O A A P, coll P B C => eqratio P A P B P C P A """
-  record = set()
-  for o,a,b,c in g.all_circles():
-    if (o,a) in record:
-      pass
-    bc = g._get_line(b,c)
-    if not bc:
-      continue
-    record.add((o,a))
-    debugname([o,a,b,c])
-    oa = g._get_line(o, a)
-    if not (oa and oa.val): 
-      continue
-    for l in a.neighbors(gm.Line):
-      if g.check_perpl(oa, l):
-        p1s = l.neighbors(gm.Point, return_set=True)
-        p2s = bc.neighbors(gm.Point, return_set=True)
-        p = intersect1(p1s, p2s)
-        if p:
-          yield dict(zip('OPABC', [o, p, a, b, c]))
-        break
 
 def match_power2cyclic(
     g: gh.Graph,
@@ -568,20 +552,23 @@ def match_power2cyclic(
           if g.check_eqratio([p, a, p, c, p, d, p, b]):
             yield dict(zip('PABCD', [p, a, b, c, d]))
           
-
+@measure_time
 def match_pascal6(
     g: gh.Graph,
     g_matcher: Callable[str, list[tuple[gm.Point, ...]]],
     theorem: pr.Theorem,
 ) -> Generator[dict[str, gm.Point], None, None]:
   """Match cyclic A B C D E F, coll G A B, coll G D E, coll H B C, coll H E F, coll I C D, coll I F A => coll G H I"""
+  tchiaya=time.time()
   recordc = set()
+  record = set()
+  cnt = 0
   for o,x,y,z in g.all_circles():
-    circle = g.get_circle_thru_triplet(x,y,z)
-    if circle in recordc:
+    if (o,x) in recordc:
       continue
-    recordc.add(circle)
-    record = set()
+    circle = g.get_circle_thru_triplet(x,y,z)
+    for op in circle.neighbors(gm.Point):
+      recordc.add((o,op))
     for a, b, c, d, e, f in utils.perm6(circle.neighbors(gm.Point)):
       if (a,b,c,d,e,f) in record:
         continue
@@ -608,7 +595,7 @@ def match_pascal6(
 
       if ab and bc and cd and de and ef and fa:
         g1s = ab.neighbors(gm.Point, return_set=True)
-        g2s = cd.neighbors(gm.Point, return_set=True)
+        g2s = de.neighbors(gm.Point, return_set=True)
         h1s = bc.neighbors(gm.Point, return_set=True)
         h2s = ef.neighbors(gm.Point, return_set=True)
         i1s = cd.neighbors(gm.Point, return_set=True)
@@ -618,6 +605,8 @@ def match_pascal6(
         i = intersect1(i1s, i2s)
         if gg and h and i:
           yield dict(zip('ABCDEFGHI',[a,b,c,d,e,f,gg,h,i]))
+  tkirine = time.time()
+  print(tkirine-tchiaya)
 
 def match_pascal6_rev(
     g: gh.Graph,
@@ -626,12 +615,13 @@ def match_pascal6_rev(
 ) -> Generator[dict[str, gm.Point], None, None]:
   """Match cyclic A B C D E, coll G A B, coll G D E, coll H B C, coll H E F, coll I C D, coll I F A, coll G H I => cyclic A B C D E F"""
   recordc = set()
+  record = set()
   for o,x,y,z in g.all_circles():
-    circle = g.get_circle_thru_triplet(x,y,z)
-    if circle in recordc:
+    if (o,x) in recordc:
       continue
-    recordc.add(circle)
-    record = set()
+    circle = g.get_circle_thru_triplet(x,y,z)
+    for op in circle.neighbors(gm.Point):
+      recordc.add((o.name,op.name))
     for a, b, c, d, e in utils.perm5(circle.neighbors(gm.Point)):
       if (a,b,c,d,e) in record:
         continue
@@ -666,6 +656,7 @@ def match_pascal6_rev(
           if h and i and g.check_coll([gg,h,i]):
             yield dict(zip('ABCDEFGHI',[a,b,c,d,e,f,gg,h,i]))
 
+@measure_time
 def match_pascal5(
     g: gh.Graph,
     g_matcher: Callable[str, list[tuple[gm.Point, ...]]],
@@ -673,12 +664,13 @@ def match_pascal5(
 ) -> Generator[dict[str, gm.Point], None, None]:
   """Match cyclic A B C D E, perp O A A G, coll G C D, coll H A B, coll H D E, coll I B C, coll I E A => coll G H I"""
   recordc = set()
+  record = set()
   for o,x,y,z in g.all_circles():
-    circle = g.get_circle_thru_triplet(x,y,z)
-    if circle in recordc:
+    if (o,x) in recordc:
       continue
-    recordc.add(circle)
-    record = set()
+    circle = g.get_circle_thru_triplet(x,y,z)
+    for op in circle.neighbors(gm.Point):
+      recordc.add((o,op))    
     for a,b,c,d,e in utils.perm5(circle.neighbors(gm.Point)):
       if (a,b,c,d,e) in record or (a,e,d,c,b) in record:
         continue
@@ -1335,6 +1327,74 @@ def match_generic(
     yield mapping
 
 
+@measure_time
+def match_generic_debug(
+    g: gh.Graph,
+    cache: Callable[str, list[tuple[gm.Point, ...]]],
+    theorem: pr.Theorem
+) -> Generator[dict[str, gm.Point], None, None]:
+  """Match any generic rule that is not one of the above match_*() rules."""
+  
+  tchiaya = time.time()
+  clause2enum = {}
+  clauses = []
+  numerical_checks = []
+  for clause in theorem.premise:
+    if clause.name in ['ncoll', 'npara', 'nperp', 'sameside']:
+      numerical_checks.append(clause)
+      continue
+
+    enum = cache(clause.name)
+    if len(enum) == 0:  # pylint: disable=g-explicit-length-test
+      return 0
+
+    clause2enum[clause] = enum
+    clauses.append((len(set(clause.args)), clause))
+
+  clauses = sorted(clauses, key=lambda x: x[0], reverse=True)
+  _, clauses = zip(*clauses)
+
+  for mapping in try_to_map([(c, clause2enum[c]) for c in clauses], {}):
+    if not mapping:
+      continue
+
+    checks_ok = True
+    for check in numerical_checks:
+      args = [mapping[a] for a in check.args]
+      if check.name == 'ncoll':
+        checks_ok = g.check_ncoll(args)
+      elif check.name == 'npara':
+        checks_ok = g.check_npara(args)
+      elif check.name == 'nperp':
+        checks_ok = g.check_nperp(args)
+      elif check.name == 'sameside':
+        checks_ok = g.check_sameside(args)
+      if not checks_ok:
+        break
+    if not checks_ok:
+      continue
+
+    yield mapping
+  tkirine = time.time()
+  print(tkirine-tchiaya)
+
+def match_test(
+    g: gh.Graph,
+    cache: Callable[str, list[tuple[gm.Point, ...]]],
+    theorem: pr.Theorem
+) -> Generator[dict[str, gm.Point], None, None]:
+  """test"""
+  debugname(theorem)
+  tchiaya = time.time()
+  
+  for o,x,y,z in g.all_circles():
+    circle = g.get_circle_thru_triplet(x,y,z)
+    sox = g._get_segment(o,x).val
+    print(vars(sox))
+  
+  tkirine = time.time()
+  print(tkirine-tchiaya,theorem.name)
+
 BUILT_IN_FNS = {
     'cong_cong_cong_cyclic': match_cong_cong_cong_cyclic,
     'cong_cong_cong_ncoll_contri*': match_cong_cong_cong_ncoll_contri,
@@ -1370,6 +1430,10 @@ BUILT_IN_FNS = {
     'eqangle6_ncoll_cyclic': match_eqangle6_ncoll_cyclic,
     'cyclic_coll_coll_eqratio': match_cyclic2power,
     'circle_perp_coll_eqratio': match_cyclic2power_tan,
+    #'cyclic_coll_coll_coll_coll_coll_coll_coll': match_pascal6,
+    'circle_cong_cong_perp_coll_coll_coll_coll_coll_coll' : match_pascal5,
+    'cyclic_coll_coll_coll_coll_coll_coll_coll': match_generic_debug,
+    #'cyclic_cyclic_cong': match_test,
 }
 
 
@@ -1592,8 +1656,8 @@ def apply_derivations(
       applied += g.do_algebra(name, arg)
   return applied
 
-def debugname(ps):
+def debugname(ps,n=0):
   if type(ps) is list:
-    print([p.name for p in ps])
+    print(n,[p.name for p in ps])
   else:
-    print(ps.name)
+    print(n,ps.name)
