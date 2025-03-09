@@ -2999,6 +2999,16 @@ class Graph:
       for x, y, z, t in utils.perm4(c.neighbors(Point)):
         yield x, y, z, t
 
+  def all_cyclics6(self) -> Generator[tuple[Point, ...], None, None]:
+    for c in self.type2nodes[Circle]:
+      for x, y, z, t, u, v in utils.perm6(c.neighbors(Point)):
+        yield x, y, z, t, u, v
+    
+  def all_cyclics5(self) -> Generator[tuple[Point, ...], None, None]:
+    for c in self.type2nodes[Circle]:
+      for x, y, z, t, u in utils.perm5(c.neighbors(Point)):
+        yield x, y, z, t, u
+
   def all_colls(self) -> Generator[tuple[Point, ...], None, None]:
     for l in self.type2nodes[Line]:
       for x, y, z in utils.perm3(l.neighbors(Point)):
@@ -3031,6 +3041,7 @@ class Graph:
     s = l.neighbors(Segment)[0]
     p1, p2 = s.points
     return p1, p2
+  
 
 
 def create_consts_str(g: Graph, s: str) -> Union[Ratio, Angle]:

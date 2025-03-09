@@ -1,2 +1,15 @@
 cyclic A B C D, coll P A B, coll P C D => eqratio P A P C P D P B
 circle O A B C, perp O A A P, coll P B C => eqratio P A P B P C P A
+coll P A B, coll P C D, ncoll A B C D, eqratio P A P C P D P B => cyclic A B C D
+cyclic A B C D, cyclic A B E F, cyclic C D E F, coll P A B, coll P C D => coll P E F
+circle O A B C, cong O A O D, cong O A O E, cong O A O F, coll G A B, coll G D E, coll H B C, coll H E F, coll I C D, coll I F A => coll G H I
+circle O A B C, cong O A O D, cong O A O E, perp O A A G, coll G C D, coll H A B, coll H D E, coll I B C, coll I E A => coll G H I
+circle O A B C, cong O A O D, perp O A A G, coll G B C, coll H A B, coll H C D, perp O B B I, coll I D A => coll G H I
+circle O A B C, cong O A O D, perp O A A G, perp O B B G, coll H A C, coll H B D, coll I C B, coll I D A => coll G H I
+circle O A B C, cong O A O D, cong O A O E, coll G A B, coll G D E, coll H B C, coll H E F, coll I C D, coll I F A, coll G H I => cong O A O F
+
+A A B B C D
+AA BC / AB CD / BB DA
+
+A A C B B D
+AA BB / AC BD / CB DA
