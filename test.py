@@ -1,2 +1,7 @@
-import tensorflow as tf
-print("TensorFlow GPU available:", tf.test.is_gpu_available())
+a = {3,4,5,6,7}
+
+b = {z for z in a if z %2 == 0}
+
+x,y = b
+
+print(x,y)
