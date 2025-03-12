@@ -7,18 +7,18 @@ DB = DC [01]
 DE = DA [02]
 DF = DA [03]
 DG = DA [04]
-E,F,H are collinear [05]
-H,A,B are collinear [06]
-F,I,G are collinear [07]
-C,I,B are collinear [08]
-J,A,G are collinear [09]
-E,C,J are collinear [10]
+H,B,A are collinear [05]
+F,E,H are collinear [06]
+I,B,C are collinear [07]
+F,I,G are collinear [08]
+E,C,J are collinear [09]
+J,G,A are collinear [10]
 
  * Auxiliary Constructions:
 : Points
 
 
  * Proof steps:
-001. DF = DA [03] & DG = DA [04] & DA = DB [00] & DE = DA [02] & DB = DC [01] ⇒  E,B,F,C,A,G are concyclic [11]
-002. E,B,F,C,A,G are concyclic [11] & E,F,H are collinear [05] & H,A,B are collinear [06] & F,I,G are collinear [07] & C,I,B are collinear [08] & J,A,G are collinear [09] & E,C,J are collinear [10] ⇒  I,J,H are collinear
+001. DA = DB [00] & DG = DA [04] & DE = DA [02] & DB = DC [01] & DF = DA [03] ⇒  E,B,C,A,F,G are concyclic [11]
+002. E,B,C,A,F,G are concyclic [11] & E,C,J are collinear [09] & J,G,A are collinear [10] & I,B,C are collinear [07] & F,I,G are collinear [08] & H,B,A are collinear [05] & F,E,H are collinear [06] ⇒  I,H,J are collinear
 ==========================

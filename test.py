@@ -1,7 +1,4 @@
-a = {3,4,5,6,7}
+a = {'x':1,'y':2}
 
-b = {z for z in a if z %2 == 0}
-
-x,y = b
-
-print(x,y)
+for z in a:
+    print(a[z])

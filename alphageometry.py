@@ -520,6 +520,8 @@ def run_alphageometry(
   # the graph to represent the proof state.
   g, _ = gh.Graph.build_problem(p, DEFINITIONS)
 
+  print("build_problem succeed")
+
   # First we run the symbolic engine DD+AR:
   if run_ddar(g, p, out_file):
     return True

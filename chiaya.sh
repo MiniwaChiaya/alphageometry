@@ -41,7 +41,7 @@ INPUT_FILE=pros2.txt
 python -m alphageometry \
 --alsologtostderr \
 --problems_file=$(pwd)/$INPUT_FILE \
---problem_name=test_pascal63 \
+--problem_name=test_pascal61 \
 --mode=alphageometry \
 "${DDAR_ARGS[@]}" \
 "${SEARCH_ARGS[@]}" \

@@ -461,7 +461,7 @@ def match_cyclic2power(
     theorem: pr.Theorem,
 ) -> Generator[dict[str, gm.Point], None, None]:
   """Match cyclic A B C D, coll P A B, coll P C D => eqratio P A P C P D P B"""
-  ta = time.time()
+  #ta =time.time()
   record = set()
   for a,b,c,d in g_matcher('cyclic'):
     if (a,b,c,d) in record:
@@ -494,8 +494,8 @@ def match_cyclic2power(
       p = intersect1(p1s, p2s)
       if p:
         yield dict(zip('PABCD',[p,a,d,b,c]))
-  tb = time.time()
-  print("c2p",tb-ta)
+  #tb =time.time()
+  #print("c2p",tb-ta)
 
 def match_cyclic2power_tan(
     g: gh.Graph,
@@ -503,7 +503,7 @@ def match_cyclic2power_tan(
     theorem: pr.Theorem,
 ) -> Generator[dict[str, gm.Point], None, None]:
   """Match circle O A B C, perp O A A P, coll P B C => eqratio P A P B P C P A """
-  ta = time.time()
+  #ta =time.time()
   for o,a,b,c in g.all_circles():
     bc = g._get_line(b,c)
     if not bc:
@@ -519,8 +519,8 @@ def match_cyclic2power_tan(
         if p:
           yield dict(zip('OPABC', [o, p, a, b, c]))
         break
-  tb = time.time()
-  print(tb-ta)
+  #tb =time.time()
+  #print(tb-ta)
 
 
 def match_power2cyclic(
@@ -529,7 +529,7 @@ def match_power2cyclic(
     theorem: pr.Theorem,
 ) -> Generator[dict[str, gm.Point], None, None]:
   """Match coll P A B, coll P C D, ncoll A B C D, eqratio P A P C P D P B => cyclic A B C D"""
-  ta = time.time()
+  #ta =time.time()
   all_lines = g.type2nodes[gm.Line]
   for l1,l2 in utils.comb2(all_lines):
       l1s = l1.neighbors(gm.Point, return_set=True)
@@ -543,8 +543,8 @@ def match_power2cyclic(
         for c,d in utils.comb2(l2s):
           if g.check_eqratio([p, a, p, c, p, d, p, b]) and not g.check_coll([p,a,c]):
             yield dict(zip('PABCD', [p, a, b, c, d]))
-  tb = time.time()
-  print("p2c",tb-ta)
+  #tb =time.time()
+  #print("p2c",tb-ta)
           
 def match_pascal6(
     g: gh.Graph,
@@ -552,7 +552,7 @@ def match_pascal6(
     theorem: pr.Theorem,
 ) -> Generator[dict[str, gm.Point], None, None]:
   """Match cyclic A B C D E F, coll G A B, coll G D E, coll H B C, coll H E F, coll I C D, coll I F A => coll G H I"""
-  ta = time.time()
+  #ta =time.time()
   recordc = set()
   record = set()
   for o,x,y,z in g.all_circles():
@@ -597,8 +597,8 @@ def match_pascal6(
         i = intersect1(i1s, i2s)
         if gg and h and i:
           yield dict(zip('ABCDEFGHI',[a,b,c,d,e,f,gg,h,i]))
-  tb = time.time()
-  print(tb-ta)
+  #tb =time.time()
+  #print(tb-ta)
 
 def match_pascal6_rev(
     g: gh.Graph,
@@ -606,7 +606,7 @@ def match_pascal6_rev(
     theorem: pr.Theorem,
 ) -> Generator[dict[str, gm.Point], None, None]:
   """Match cyclic A B C D E, coll G A B, coll G D E, coll H B C, coll H E F, coll I C D, coll I F A, coll G H I => cyclic A B C D E F"""
-  ta = time.time()
+  #ta =time.time()
   recordc = set()
   record = set()
   for o,x,y,z in g.all_circles():
@@ -648,8 +648,8 @@ def match_pascal6_rev(
           i = intersect1(i1s, i2s)
           if h and i and g.check_coll([gg,h,i]):
             yield dict(zip('OABCDEFGHI',[o,a,b,c,d,e,f,gg,h,i]))
-  tb = time.time()
-  print(tb-ta)
+  #tb =time.time()
+  #print(tb-ta)
 
 def match_pascal5(
     g: gh.Graph,
@@ -657,7 +657,7 @@ def match_pascal5(
     theorem: pr.Theorem,
 ) -> Generator[dict[str, gm.Point], None, None]:
   """Match cyclic A B C D E, perp O A A G, coll G C D, coll H A B, coll H D E, coll I B C, coll I E A => coll G H I"""
-  ta = time.time()
+  #ta =time.time()
   recordc = set()
   record = set()
   for o,x,y,z in g.all_circles():
@@ -700,8 +700,8 @@ def match_pascal5(
       i = intersect1(i1s, i2s)
       if gg and h and i:
         yield dict(zip('OABCDEGHI',[o,a,b,c,d,e,gg,h,i]))
-  tb = time.time()
-  print(tb-ta)
+  #tb =time.time()
+  #print(tb-ta)
 
 def match_pascal41(
     g: gh.Graph,
@@ -709,7 +709,7 @@ def match_pascal41(
     theorem: pr.Theorem,
 ) -> Generator[dict[str, gm.Point], None, None]:
   """circle O A B C, cong O A O D, perp O A A G, coll G B C, coll H A B, coll H C D, perp O B B I, coll I D A => coll G H I (AABBCD)"""
-  ta = time.time()
+  #ta =time.time()
   recordc = set()
   record = set()
   for o,x,y,z in g.all_circles():
@@ -760,8 +760,8 @@ def match_pascal41(
       i = intersect1(i1s, i2s)
       if gg and h and i:
         yield dict(zip('OABCDGHI',[o,a,b,c,d,gg,h,i]))
-  tb = time.time()
-  print(tb-ta)
+  #tb =time.time()
+  #print(tb-ta)
 
 def match_pascal42(
     g: gh.Graph,
@@ -769,7 +769,7 @@ def match_pascal42(
     theorem: pr.Theorem,
 ) -> Generator[dict[str, gm.Point], None, None]:
   """circle O A B C, cong O A O D, perp O A A G, perp O B B G, coll H A C, coll H B D, coll I C B, coll I D A => coll G H I (AACBBD)"""
-  ta = time.time()
+  #ta =time.time()
   recordc = set()
   record = set()
   for o,x,y,z in g.all_circles():
@@ -820,8 +820,8 @@ def match_pascal42(
       i = intersect1(i1s, i2s)
       if gg and h and i:
         yield dict(zip('OABCDGHI',[o,a,b,c,d,gg,h,i]))
-  tb = time.time()
-  print(tb-ta)
+  #tb =time.time()
+  #print(tb-ta)
 
 def match_radical_axis(
     g: gh.Graph,
@@ -829,7 +829,7 @@ def match_radical_axis(
     theorem: pr.Theorem,
 ) -> Generator[dict[str, gm.Point], None, None]:
   """cyclic A B C D, cyclic A B E F, cyclic C D E F, coll P A B, coll P C D => coll P E F"""
-  ta = time.time()
+  #ta =time.time()
   circles = set()
   recordc = set()
   for o,x,y,z in g.all_circles():
@@ -874,8 +874,8 @@ def match_radical_axis(
           yield dict(zip('ABCDEFP',[a,b,e,f,c,d,p2]))
         if p3:
           yield dict(zip('ABCDEFP',[c,d,e,f,a,b,p3]))
-  tb = time.time()
-  print(tb-ta)
+  #tb =time.time()
+  #print(tb-ta)
   
 def rotate_simtri(
     a: gm.Point, b: gm.Point, c: gm.Point, x: gm.Point, y: gm.Point, z: gm.Point
@@ -1295,8 +1295,8 @@ def match_generic(
     theorem: pr.Theorem
 ) -> Generator[dict[str, gm.Point], None, None]:
   """Match any generic rule that is not one of the above match_*() rules."""
-  debugname(theorem)
-  ta = time.time()
+  #debugname(theorem)
+  #ta =time.time()
   clause2enum = {}
 
   clauses = []
@@ -1338,8 +1338,8 @@ def match_generic(
 
     yield mapping
 
-  tb = time.time()
-  print(tb-ta)
+  #tb =time.time()
+  #print(tb-ta)
 
 
 def match_generic_debug(
@@ -1390,7 +1390,7 @@ def match_generic_debug(
 
     yield mapping
   tkirine = time.time()
-  print(theorem.name,tkirine-tchiaya)
+  #print(theorem.name,tkirine-tchiaya)
 
 def match_test(
     g: gh.Graph,
@@ -1407,7 +1407,7 @@ def match_test(
     print(vars(sox))
   
   tkirine = time.time()
-  print(tkirine-tchiaya,theorem.name)
+  #print(tkirine-tchiaya,theorem.name)
 
 BUILT_IN_FNS = {
     'cong_cong_cong_cyclic': match_cong_cong_cong_cyclic,

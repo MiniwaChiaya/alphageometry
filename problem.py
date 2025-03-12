@@ -599,7 +599,7 @@ class EmptyDependency:
 
   def populate(self, name: str, args: list[gm.Point]) -> Dependency:
     dep = Dependency(name, args, self.rule_name, self.level)
-    dep.trace2 = self.trace
+    dep.trace = self.trace
     dep.why = list(self.why)
     return dep
 
@@ -1129,5 +1129,27 @@ def hashed_txt(name: str, args: list[str]) -> tuple[str, ...]:
 
   if name in ['sameside', 's_angle']:
     return (name,) + tuple(args)
+
+  if name in ['eqratio30']:# TODO
+    a, b, c, d, e, f, g, h, i, j, k, l = args
+    a, b = sorted([a, b])
+    c, d = sorted([c, d])
+    e, f = sorted([e, f])
+    g, h = sorted([g, h])
+    i, j = sorted([i, j])
+    k, l = sorted([k, l])
+    ratios1 = [(a, b),(e, f),(i, j)]
+    ratios1.sort()
+    ratios2 = [(c, d),(g, h),(k, l)]
+    ratios2.sort()
+    if ratios1 > ratios2:
+      ratios1, ratios2 = ratios2, ratios1
+    a, b = ratios1[0]
+    e, f = ratios1[1]
+    i, j = ratios1[2]
+    c, d = ratios2[0]
+    g, h = ratios2[1]
+    k, l = ratios2[2]
+    return (name, a, b, c, d, e, f, g, h, i, j, k, l)
 
   raise ValueError(f'Not recognize {name} to hash.')
