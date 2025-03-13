@@ -609,3 +609,5 @@ def val_type(x: Node) -> Type[Node]:
     return Value
   if isinstance(x, Ratio_Pro):
     return Value
+  if isinstance(x, Length_Pro):
+    return Value

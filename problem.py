@@ -1130,7 +1130,8 @@ def hashed_txt(name: str, args: list[str]) -> tuple[str, ...]:
   if name in ['sameside', 's_angle']:
     return (name,) + tuple(args)
 
-  if name in ['eqratio30']:# TODO
+  if name in ['eqratio30']:
+
     a, b, c, d, e, f, g, h, i, j, k, l = args
     a, b = sorted([a, b])
     c, d = sorted([c, d])
@@ -1150,6 +1151,7 @@ def hashed_txt(name: str, args: list[str]) -> tuple[str, ...]:
     c, d = ratios2[0]
     g, h = ratios2[1]
     k, l = ratios2[2]
+    
     return (name, a, b, c, d, e, f, g, h, i, j, k, l)
 
   raise ValueError(f'Not recognize {name} to hash.')
