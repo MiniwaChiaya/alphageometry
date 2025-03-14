@@ -513,6 +513,8 @@ class Length_Pro(Node):
     return Value()
 
   def set_lengths(self, l1: Length, l2: Length) -> None:
+    if l1.name < l2.name:
+      l1, l2 = l2, l1
     self._l = Multiset([l1, l2])
 
   @property

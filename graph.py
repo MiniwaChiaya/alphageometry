@@ -234,7 +234,7 @@ class Graph:
       ab, cd = dep.algebra
       self.rtable.add_eq(ab, cd, dep)
     
-    if name == 'eqratio30': # TODO
+    if name == 'eqratio30':
       ab, cd, mn, pq, xy, zw = dep.algebra
       pq_zw, why1 = self._get_or_create_length_pro_l(pq, zw, deps=None)
       mn_xy, why2 = self._get_or_create_length_pro_l(mn, xy, deps=None)
@@ -378,6 +378,16 @@ class Graph:
         return []
       return self.add_cong([a, b, c, d], dep)
 
+    if name == 'eqratio30': # TODO
+      a, b, c, d, e, f, dep = args
+      a1, a2 = a._obj.points
+      b1, b2 = b._obj.points
+      c1, c2 = c._obj.points
+      d1, d2 = d._obj.points
+      e1, e2 = e._obj.points
+      f1, f2 = f._obj.points
+      return self.add_eqratio30([a1, a2, b1, b2, c1, c2, d1, d2, e1, e2, f1, f2], dep)
+
     return []
 
   def derive_algebra(
@@ -398,14 +408,14 @@ class Graph:
     # Separate eqangle and eqratio derivations
     # As they are too numerous => slow down DD+AR.
     # & reserve them only for last effort.
-    eqs = {'eqangle': derives.pop('eqangle'), 'eqratio': derives.pop('eqratio')}
+    eqs = {'eqangle': derives.pop('eqangle'), 'eqratio': derives.pop('eqratio'), 'eqratio30': derives.pop('eqratio30')}
     return derives, eqs
 
   def derive_ratio_algebra(
       self, level: int, verbose: bool = False
   ) -> dict[str, list[tuple[Point, ...]]]:
     """Derive new eqratio predicates."""
-    added = {'cong2': [], 'eqratio': []}
+    added = {'cong2': [], 'eqratio': [] , 'eqratio30': []}
 
     for x in self.rtable.get_all_eqs_and_why():
       x, why = x[:-1], x[-1]
@@ -414,15 +424,32 @@ class Graph:
 
       if len(x) == 2:
         a, b = x
+        if type(a) is gm.Length_Pro and type(b) is gm.Length_Pro: #dealt in len(x) == 4
+          continue
         if gm.is_equiv(a, b):
           continue
 
         (m, n), (p, q) = a._obj.points, b._obj.points
         added['cong2'].append((m, n, p, q, dep))
 
-      if len(x) == 4:
+      if len(x) == 4: # TODO
         a, b, c, d = x
-        added['eqratio'].append((a, b, c, d, dep))
+        if type(a) is gm.Length and type(d) is gm.Length:
+          assert type(b) is gm.Length, f"b.type:{type(b)}"
+          assert type(c) is gm.Length, f"c.type:{type(c)}"
+          added['eqratio'].append((a, b, c, d, dep))
+        if {type(a),type(d)} == {gm.Length, gm.Length_Pro}:
+          assert {type(b), type(c)} == {gm.Length, gm.Length_Pro}, f"b.type:{type(b)}, c.type:{type(c)}"
+          if type(a) is gm.Length: # type(d) is gm.Length_Pro
+            a, d = d, a
+          if type(b) is gm.Length: # type(c) is gm.Length_Pro
+            b, c = c, b
+          a1, a2 = a._l
+          b1, b2 = b._l
+          added['eqratio30'].append((a1, b1, a2, b2, d, c, dep))
+        if type(a) is gm.Length_Pro and type(d) is gm.Length_Pro:
+          assert type(b) is gm.Length_Pro, f"b.type:{type(b)}"
+          assert type(c) is gm.Length_Pro, f"c.type:{type(c)}"
 
     return added
 
@@ -2181,6 +2208,8 @@ class Graph:
   def _get_or_create_length_pro_l(
       self, l1: Length, l2: Length, deps: Dependency
   ) -> tuple[Length_Pro, list[Dependency]]:
+    if l1.name < l2.name :
+      l1, l2 = l2, l1
     for lp in self.type2nodes[Length_Pro]:
       if lp.lengths == Multiset([l1.rep(), l2.rep()]):
         l1_, l2_ = lp._l

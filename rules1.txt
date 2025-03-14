@@ -1,1 +1,1 @@
-cyclic A B C D E F, coll G A B, coll G D E, coll H B C, coll H E F, coll I C D, coll I F A => eqratio30 A B C D E F G H I A B C
+coll A F B, coll B D C, coll C E A, coll B P E, coll C P F, eqratio30 A F F B B D D C C E E A => coll A P D
