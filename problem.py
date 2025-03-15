@@ -689,6 +689,8 @@ class Dependency(Construction):
 
   def _find(self, dep_hashed: tuple[str, ...]) -> Dependency:
     for w in self.why:
+      if not w:
+        continue
       f = w._find(dep_hashed)
       if f:
         return f
@@ -709,8 +711,10 @@ class Dependency(Construction):
 
   def why_me_or_cache(self, g: Any, level: int) -> Dependency:
     if self.hashed() in g.cache:
+      print("hs", self.hashed(), g.cache[self.hashed()])
       return g.cache[self.hashed()]
     self.why_me(g, level)
+    print("new", self.hashed())
     return self
 
   def populate(self, name: str, args: list[gm.Point]) -> Dependency:

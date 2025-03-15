@@ -363,7 +363,7 @@ class Table:
   def register2(
       self, a: str, b: str, m: float, n: float, dep: pr.Dependency
   ) -> None:
-    self.register([(a, n), (b, -m)], dep)
+    self.register([(a, m), (b, -n)], dep)
 
   def register3(self, a: str, b: str, f: float, dep: pr.Dependency) -> None:
     self.register([(a, 1), (b, -1), (self.const, -f)], dep)
@@ -431,7 +431,7 @@ class Table:
       self, a: str, b: str, m: float, n: float, dep: pr.Dependency
   ) -> None:
     # a/b = m/n ???
-    if not self.add_expr([(a, n), (b, -m)]): 
+    if not self.add_expr([(a, m), (b, -n)]): 
       return []
     self.register2(a, b, m, n, dep)
 
@@ -506,6 +506,7 @@ class Table:
           self.eqs.add((v1, v2))
           # why v1 - v2 = e12 ?  (note modulo(e12) == 0)
           why_dict = minus({v1: 1, v2: -1}, minus(self.v2e[v1], self.v2e[v2]))
+          #print(v1, v2)
           yield v1, v2, self.why(why_dict)
         continue
 
@@ -560,6 +561,7 @@ class GeometricTable(Table):
     for out in super().get_all_eqs_and_why(return_quads):
       if len(out) == 3:
         x, y, why = out
+        #print("out2", x, y)
         x, y = self.map2obj([x, y])
         yield x, y, why
       if len(out) == 4:
@@ -568,6 +570,7 @@ class GeometricTable(Table):
         yield x, y, f, why
       if len(out) == 5:
         a, b, x, y, why = out
+        #print("out4", a, b, x, y)
         a, b, x, y = self.map2obj([a, b, x, y])
         yield a, b, x, y, why
 

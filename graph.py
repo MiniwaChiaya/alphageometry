@@ -18,7 +18,8 @@
 # pylint: disable=g-multiple-import
 from __future__ import annotations
 
-from collections import defaultdict  # pylint: disable=g-importing-member
+from collections import defaultdict
+from queue import Empty  # pylint: disable=g-importing-member
 from typing import Callable, Generator, Optional, Type, Union
 
 from absl import logging
@@ -194,7 +195,7 @@ class Graph:
       return
 
     name, args = dep.name, dep.args
-    print(name, args)
+    # print(name, args)
 
     if name == 'para':
       ab, cd = dep.algebra
@@ -237,6 +238,7 @@ class Graph:
     
     if name == 'eqratio30': # TODO
       #print(dep.algebra)
+      
       ab, cd, mn, pq, xy, zw = dep.algebra
       pq_zw, why1 = self._get_or_create_length_pro_l(pq, zw, deps=None)
       mn_xy, why2 = self._get_or_create_length_pro_l(mn, xy, deps=None)
@@ -1758,31 +1760,31 @@ class Graph:
     xy_zw, zw_xy, why2 = self._get_or_create_ratio(xy, zw, deps=None)
 
     if ab != cd:
-      dep0 = deps.populate(depname, [a, b, c, d, m, n, p, q, x, y, z, w])
+      dep0 = deps.populate('eqratio30', [a, b, c, d, m, n, p, q, x, y, z, w])
       deps = EmptyDependency(level=deps.level, rule_name=None)
 
-      dep = Dependency(eqname, [a, b, c, d], None, deps.level)
+      dep = Dependency('cong', [a, b, c, d], None, deps.level)
       deps.why = [dep0, dep.why_me_or_cache(self, None)]
 
     add = []
     is_eq1 = self.is_equal(mn_pq, zw_xy)
     deps1 = None
     if deps:
-      deps1 = deps.populate(midname, [m, n, p, q, z, w, x, y])
+      deps1 = deps.populate('eqratio', [m, n, p, q, z, w, x, y])
       deps1.algebra = [mn._val, pq._val, zw._val, xy._val]
     if not is_eq1:
       add += [deps1]
-    self.cache_dep(midname, [m, n, p, q, z, w, x, y], deps1)
+    self.cache_dep('eqratio', [m, n, p, q, z, w, x, y], deps1)
     self.make_equal(mn_pq, zw_xy, deps=deps1)
 
     is_eq2 = self.is_equal(pq_mn, xy_zw)
     deps2 = None
     if deps:
-      deps2 = deps.populate(midname, [p, q, m, n, x, y, z, w])
+      deps2 = deps.populate('eqratio', [p, q, m, n, x, y, z, w])
       deps2.algebra = [pq._val, mn._val, xy._val, zw._val]
     if not is_eq2:
       add += [deps2]
-    self.cache_dep(midname, [p, q, m, n, x, y, z, w], deps1)
+    self.cache_dep('eqratio', [p, q, m, n, x, y, z, w], deps1)
     self.make_equal(mn_pq, zw_xy, deps=deps2)
     
     return add
@@ -1795,24 +1797,54 @@ class Graph:
   ) -> Optional[list[Dependency]]:
     """Add ab/cd * mn/pq * xy/zw = 1 in case maybe either 1 up and 1 down are equal."""
     level = deps.level
+    add = []
     if self.is_equal(ab, cd, level):
-      return self.make_equal_pairs30(a, b, c, d, m, n, p, q, x, y, z, w, ab, cd, mn, pq, xy, zw, deps)
+      toadd2 = self.make_equal_pairs30(a, b, c, d, m, n, p, q, x, y, z, w, ab, cd, mn, pq, xy, zw, deps)
+      #toadd3 = self.add_eqratio23([a, b, c, d], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)
     if self.is_equal(ab, pq, level):
-      return self.make_equal_pairs30(a, b, p, q, m, n, c, d, x, y, z, w, ab, pq, mn, cd, xy, zw, deps)
+      toadd2 = self.make_equal_pairs30(a, b, p, q, m, n, c, d, x, y, z, w, ab, pq, mn, cd, xy, zw, deps)
+      #toadd3 = self.add_eqratio23([a, b, p, q], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)
     if self.is_equal(ab, zw, level):
-      return self.make_equal_pairs30(a, b, z, w, m, n, p, q, x, y, c, d, ab, zw, mn, pq, xy, cd, deps)
+      toadd2 = self.make_equal_pairs30(a, b, z, w, m, n, p, q, x, y, c, d, ab, zw, mn, pq, xy, cd, deps)
+      #toadd3 = self.add_eqratio23([a, b, z, w], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)
     if self.is_equal(mn, cd, level):
-      return self.make_equal_pairs30(m, n, c, d, a, b, p, q, x, y, z, w, mn, cd, ab, pq, xy, zw, deps)
+      toadd2 = self.make_equal_pairs30(m, n, c, d, a, b, p, q, x, y, z, w, mn, cd, ab, pq, xy, zw, deps)
+      #toadd3 = self.add_eqratio23([m, n, c, d], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)
     if self.is_equal(mn, pq, level):
-      return self.make_equal_pairs30(m, n, p, q, a, b, c, d, x, y, z, w, mn, pq, ab, cd, xy, zw, deps)
+      toadd2 = self.make_equal_pairs30(m, n, p, q, a, b, c, d, x, y, z, w, mn, pq, ab, cd, xy, zw, deps)
+      #toadd3 = self.add_eqratio23([m, n, p, q], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)
     if self.is_equal(mn, zw, level):
-      return self.make_equal_pairs30(m, n, z, w, a, b, c, d, x, y, p, q, mn, zw, ab, cd, xy, pq, deps)
+      toadd2 = self.make_equal_pairs30(m, n, z, w, a, b, c, d, x, y, p, q, mn, zw, ab, cd, xy, pq, deps)
+      #toadd3 = self.add_eqratio23([m, n, z, w], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)
     if self.is_equal(xy, cd, level):
-      return self.make_equal_pairs30(x, y, c, d, a, b, p, q, m, n, z, w, xy, cd, ab, pq, mn, zw, deps)
+      toadd2 = self.make_equal_pairs30(x, y, c, d, a, b, p, q, m, n, z, w, xy, cd, ab, pq, mn, zw, deps)
+      #toadd3 = self.add_eqratio23([x, y, c, d], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)
     if self.is_equal(xy, pq, level):
-      return self.make_equal_pairs30(x, y, p, q, a, b, c, d, m, n, z, w, xy, pq, ab, cd, mn, zw, deps)
+      toadd2 = self.make_equal_pairs30(x, y, p, q, a, b, c, d, m, n, z, w, xy, pq, ab, cd, mn, zw, deps)
+      #toadd3 = self.add_eqratio23([x, y, p, q], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)
     if self.is_equal(xy, zw, level):
-      return self.make_equal_pairs30(x, y, z, w, a, b, c, d, m, n, p, q, xy, zw, ab, cd, mn, pq, deps)
+      toadd2 = self.make_equal_pairs30(x, y, z, w, a, b, c, d, m, n, p, q, xy, zw, ab, cd, mn, pq, deps)
+      #toadd3 = self.add_eqratio23([x, y, z, w], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)
+    if add != []:
+      return add
     return None
 
   def _add_eqangle(
@@ -2530,6 +2562,33 @@ class Graph:
     self.make_equal(cd_ab, mn_pq_xy_zw, deps=deps2)
     return add
 
+  def add_eqratio23(
+    self, points: list[Point], depss: list[Dependency], emp: EmptyDependency
+  ) -> list[Dependency]:
+    """Add a eqratio30 from cong and eqratio"""
+    print("echo")
+    if depss == []:
+      return []
+    if emp:
+      emp = emp.copy()
+    add3 = []
+    a, b, c, d = points
+    ab = self._get_or_create_segment(a, b, deps=None)._val
+    cd = self._get_or_create_segment(a, b, deps=None)._val
+    for dep2 in depss:
+      m, n, p, q, z, w, x, y = dep2.args
+      mn, pq, zw, xy = dep2.algebra
+      args = [a, b, c, d, m, n, p, q, x, y, z, w]
+      dep1 = Dependency('cong', [a, b, c, d], None, dep2.level)
+      dep3 = Dependency('eqratio30', args, None, dep2.level)
+      dep3.why = [dep2, dep1.why_me_or_cache(self, None)]
+      dep3.algebra = [ab, cd, mn, pq, xy, zw]
+      print("alg",dep3.algebra)
+      self.cache_dep('eqratio30', args, dep3) #TODO
+      add3 += [dep3]
+    return add3
+    
+
   def add_eqratio30(
       self, points: list[Point], deps: EmptyDependency
   ) -> list[Dependency]:
@@ -2556,32 +2615,57 @@ class Graph:
     )
 
     if add is not None:
-      dp = add[0]
-      print(dp.name, [aug.name for aug in dp.args])
       return add
 
 
     add = []
     if ab.val == cd.val:
-      add += self.add_eqratio([m, n, p, q, z, w, x, y], deps)
+      toadd2 = self.add_eqratio([m, n, p, q, z, w, x, y], deps)
+      #toadd3 = self.add_eqratio23([a, b, c, d], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)  
     if ab.val == pq.val:
-      add += self.add_eqratio([m, n, c, d, z, w, x, y], deps)
+      toadd2 = self.add_eqratio([m, n, c, d, z, w, x, y], deps)
+      #toadd3 = self.add_eqratio23([a, b, p, q], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)  
     if ab.val == zw.val:
-      add += self.add_eqratio([m, n, p, q, c, d, x, y], deps)
+      toadd2 = self.add_eqratio([m, n, p, q, c, d, x, y], deps)
+      #toadd3 = self.add_eqratio23([a, b, z, w], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)        
     if mn.val == cd.val:
-      add += self.add_eqratio([a, b, p, q, z, w, x, y], deps)
+      toadd2 = self.add_eqratio([a, b, p, q, z, w, x, y], deps)
+      #toadd3 = self.add_eqratio23([m, n, c, d], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)  
     if mn.val == pq.val:
-      add += self.add_eqratio([a, b, c, d, z, w, x, y], deps)
+      toadd2 = self.add_eqratio([a, b, c, d, z, w, x, y], deps)
+      #toadd3 = self.add_eqratio23([m, n, p, q], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)  
     if mn.val == zw.val:
-      add += self.add_eqratio([a, b, c, d, p, q, x, y], deps)
+      toadd2 = self.add_eqratio([a, b, c, d, p, q, x, y], deps)
+      #toadd3 = self.add_eqratio23([m, n, z, w], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)  
     if xy.val == cd.val:
-      add += self.add_eqratio([a, b, p, q, z, w, m, n], deps)
+      toadd2 = self.add_eqratio([a, b, p, q, z, w, m, n], deps)
+      #toadd3 = self.add_eqratio23([x, y, c, d], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)  
     if xy.val == pq.val:
-      add += self.add_eqratio([a, b, c, d, z, w, m, n], deps)
+      toadd2 = self.add_eqratio([a, b, c, d, z, w, m, n], deps)
+      #toadd3 = self.add_eqratio23([x, y, p, q], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)  
     if xy.val == zw.val:
-      add += self.add_eqratio([a, b, c, d, p, q, m, n], deps)
+      toadd2 = self.add_eqratio([a, b, c, d, p, q, m, n], deps)
+      #toadd3 = self.add_eqratio23([x, y, z, w], toadd2, deps)
+      toadd3 = []
+      add += (toadd2 + toadd3)
     if add != []:
-      assert False , "2"
+      #assert False , "2"
       return add
     add += self._add_eqratio30(a, b, c, d, m, n, p, q, x, y, z, w, ab, cd, mn, pq, xy, zw, deps)
     add += self._add_eqratio30(a, b, p, q, m, n, c, d, x, y, z, w, ab, pq, mn, cd, xy, zw, deps)
@@ -2592,7 +2676,7 @@ class Graph:
     add += self._add_eqratio30(x, y, c, d, a, b, p, q, m, n, z, w, xy, cd, ab, pq, mn, zw, deps)
     add += self._add_eqratio30(x, y, p, q, a, b, c, d, m, n, z, w, xy, pq, ab, cd, mn, zw, deps)
     add += self._add_eqratio30(x, y, z, w, a, b, c, d, m, n, p, q, xy, zw, ab, cd, mn, pq, deps)
-    assert False, "3"
+    #assert False, "3"
     return add
 
   def check_rconst(self, points: list[Point], verbose: bool = False) -> bool:
@@ -2816,6 +2900,7 @@ class Graph:
       self, name: str, args: list[Point], premises: list[Dependency]
   ) -> None:
     hashed = problem.hashed(name, args)
+    #print("hs",hashed)
     if hashed in self.cache:
       return
     self.cache[hashed] = premises
@@ -3074,7 +3159,6 @@ class Graph:
             added += adds
             for add in adds:
               self.cache_dep(add.name, add.args, add)
-
     assert len(plevel_done) == len(new_points)
     for p in new_points:
       p.basics = basics

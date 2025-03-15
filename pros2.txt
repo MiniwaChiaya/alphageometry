@@ -38,3 +38,7 @@ test_gcenter1
 a b c = triangle a b c; d = midpoint d b c; e = midpoint e c a; g = on_line g b e, on_line g a d; f = on_line f a b, on_line f c g ? cong f a f b
 test_gcenter2
 a b c = triangle a b c; d = midpoint d b c; e = midpoint e c a; f = midpoint f a b; g = on_line g b e, on_line g c f ? coll a g d
+test_icenter1
+a b c = triangle a b c; d = angle_bisector d b a c, on_line d b c; e = angle_bisector e a b c, on_line e a c; i = on_line i a d, on_line i b e; f = on_line f c i, on_line f a b ? eqangle c a c f c f c b
+example2_1
+a b c = triangle a b c; d = foot d a b c; h = on_line h a d; e = on_line e a c, on_line e b h; f = on_line f a b, on_line f c h; p = on_pline p a b c, on_line p d f; q = on_line q p a, on_line q d e ? cong a p a q

@@ -1,1 +1,2 @@
 coll A F B, coll B D C, coll C E A, onseg A F B, onseg B D C, onseg C E A, coll B P E, coll C P F, coll A P D => eqratio30 A F F B B D D C C E E A
+para A B C D, coll O A C, coll O B D => eqratio3 A B C D O O

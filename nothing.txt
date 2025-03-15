@@ -20,3 +20,97 @@ circle O A B C, cong O A O D, cong O A O E, coll G A B, coll G D E, coll H B C, 
 cyclic A B C D E F, coll G A B, coll G D E, coll H B C, coll H E F, coll I C D, coll I F A => coll G H I
 circle O A B C, cong O A O D, cong O A O E, cong O A O F, coll G A B, coll G D E, coll H B C, coll H E F, coll I C D, coll I F A => coll G H I
 cyclic A B C D, cyclic A B C E => cong A D A E
+
+build_problem succeed
+out2 l(CD) l(BD)
+l(CD) l(BD)
+out2 l(AE) l(CE)
+l(AE) l(CE)
+out4 l(CD) l(AE) l(CD) l(CE)
+out4 l(CD) l(CE) l(BD) l(AE)
+out4 l(BD) l(AE) l(BD) l(CE)
+hello from 1
+eqratio ['a', 'g', 'g', 'b', 'e', 'a', 'c', 'e']
+out2 l(BG) l(AG)
+l(BG) l(AG)
+out4 l(CD) l(BG) l(CD) l(AG)
+out4 l(CD) l(AG) l(BD) l(BG)
+out4 l(BD) l(BG) l(BD) l(AG)
+out4 l(AE) l(BG) l(AE) l(AG)
+out4 l(CE) l(BG) l(CE) l(AG)
+bfs {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': [(<geometry.Point object at 0x7f53904d5150>, <geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d5c30>, <geometry.Point object at 0x7f53904d5150>, <problem.EmptyDependency object at 0x7f53902dd2a0>)]}
+8
+sat, [{'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': [(<geometry.Point object at 0x7f53904d5150>, <geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d5c30>, <geometry.Point object at 0x7f53904d5150>, <problem.EmptyDependency object at 0x7f53902dd2a0>)]}]
+hello from 2
+eqratio ['g', 'b', 'a', 'g', 'c', 'e', 'e', 'a']
+bfs {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}
+1
+sat, [{'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': [(<geometry.Point object at 0x7f53904d5150>, <geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d5c30>, <geometry.Point object at 0x7f53904d5150>, <problem.EmptyDependency object at 0x7f53902dd2a0>)]}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}]
+hello from 3
+eqratio ['g', 'b', 'a', 'g', 'c', 'e', 'e', 'a']
+bfs {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}
+1
+sat, [{'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': [(<geometry.Point object at 0x7f53904d5150>, <geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d5c30>, <geometry.Point object at 0x7f53904d5150>, <problem.EmptyDependency object at 0x7f53902dd2a0>)]}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}]
+hello from 4
+eqratio ['g', 'b', 'a', 'g', 'c', 'e', 'e', 'a']
+bfs {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}
+1
+sat, [{'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': [(<geometry.Point object at 0x7f53904d5150>, <geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d5c30>, <geometry.Point object at 0x7f53904d5150>, <problem.EmptyDependency object at 0x7f53902dd2a0>)]}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}]
+hello from 5
+eqratio ['g', 'b', 'a', 'g', 'c', 'e', 'e', 'a']
+bfs {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}
+1
+sat, [{'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': [(<geometry.Point object at 0x7f53904d5150>, <geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d5c30>, <geometry.Point object at 0x7f53904d5150>, <problem.EmptyDependency object at 0x7f53902dd2a0>)]}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}]
+hello from 6
+eqratio ['g', 'b', 'a', 'g', 'c', 'e', 'e', 'a']
+bfs {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}
+1
+sat, [{'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': [(<geometry.Point object at 0x7f53904d5150>, <geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d5c30>, <geometry.Point object at 0x7f53904d5150>, <problem.EmptyDependency object at 0x7f53902dd2a0>)]}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}]
+hello from 7
+eqratio ['g', 'b', 'a', 'g', 'c', 'e', 'e', 'a']
+bfs {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}
+1
+sat, [{'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': [(<geometry.Point object at 0x7f53904d5150>, <geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d5c30>, <geometry.Point object at 0x7f53904d5150>, <problem.EmptyDependency object at 0x7f53902dd2a0>)]}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}]
+hello from 8
+eqratio ['g', 'b', 'a', 'g', 'c', 'e', 'e', 'a']
+bfs {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}
+1
+sat, [{'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': [(<geometry.Point object at 0x7f53904d5150>, <geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d5c30>, <geometry.Point object at 0x7f53904d5150>, <problem.EmptyDependency object at 0x7f53902dd2a0>)]}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}]
+hello from 9
+eqratio ['g', 'b', 'a', 'g', 'c', 'e', 'e', 'a']
+bfs {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}
+1
+sat, [{'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': [(<geometry.Point object at 0x7f53904d5150>, <geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d5c30>, <geometry.Point object at 0x7f53904d5150>, <problem.EmptyDependency object at 0x7f53902dd2a0>)]}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}]
+hello from 10
+eqratio ['g', 'b', 'a', 'g', 'c', 'e', 'e', 'a']
+bfs {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}
+1
+sat, [{'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': [(<geometry.Point object at 0x7f53904d5150>, <geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d5c30>, <geometry.Point object at 0x7f53904d5150>, <problem.EmptyDependency object at 0x7f53902dd2a0>)]}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}]
+retsat
+sov, [{'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [(<geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d6620>, <geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d66b0>, 1, 2, <problem.EmptyDependency object at 0x7f53904d5d50>), (<geometry.Point object at 0x7f53904d67d0>, <geometry.Point object at 0x7f53904d5c30>, <geometry.Point object at 0x7f53904d66b0>, <geometry.Point object at 0x7f53904d5c30>, 1, 2, <problem.EmptyDependency object at 0x7f53902dd120>)], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': [(<geometry.Point object at 0x7f53904d5150>, <geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d5c30>, <geometry.Point object at 0x7f53904d5150>, <problem.EmptyDependency object at 0x7f53902dd2a0>)]}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}]
+retsat
+sov, [{'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': [(<geometry.Point object at 0x7f53904d5150>, <geometry.Point object at 0x7f53904d56f0>, <geometry.Point object at 0x7f53904d5c30>, <geometry.Point object at 0x7f53904d5150>, <problem.EmptyDependency object at 0x7f53902dd2a0>)]}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}]
+retsat
+sov, [{'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}, {'aconst': [], 'para': [], 'inci': [], 'cong': [], 'rconst': [], 'cong2': []}]
+Traceback (most recent call last):
+  File "/environment/miniconda3/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/environment/miniconda3/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/featurize/work/alphageometry/alphageometry.py", line 652, in <module>
+    app.run(main)
+  File "/home/featurize/work/alphageometry/lib/python3.10/site-packages/absl/app.py", line 308, in run
+    _run_main(main, args)
+  File "/home/featurize/work/alphageometry/lib/python3.10/site-packages/absl/app.py", line 254, in _run_main
+    sys.exit(main(argv))
+  File "/home/featurize/work/alphageometry/alphageometry.py", line 639, in main
+    run_alphageometry(
+  File "/home/featurize/work/alphageometry/alphageometry.py", line 526, in run_alphageometry
+    if run_ddar(g, p, out_file):
+  File "/home/featurize/work/alphageometry/alphageometry.py", line 224, in run_ddar
+    write_solution(g, p, out_file)
+  File "/home/featurize/work/alphageometry/alphageometry.py", line 184, in write_solution
+    nl = proof_step_string(step, refs, last_step=i == len(proof_steps) - 1)
+  File "/home/featurize/work/alphageometry/alphageometry.py", line 125, in proof_step_string
+    conclusion_nl += ' [{:02}]'.format(refs[conclusion.hashed()])
+TypeError: unsupported operand type(s) for +=: 'NoneType' and 'str'

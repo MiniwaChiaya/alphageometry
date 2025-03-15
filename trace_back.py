@@ -280,6 +280,7 @@ def get_logs(
 ]:
   """Given a DAG and conclusion N, return the premise, aux, proof."""
   query = query.why_me_or_cache(g, query.level)
+  query.why = [w for w in query.why if type(w) is not list]
   log = recursive_traceback(query)
   log, setup, aux_setup, setup_points, _ = separate_dependency_difference(
       query, log

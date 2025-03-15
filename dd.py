@@ -1352,7 +1352,7 @@ def match_generic(
     theorem: pr.Theorem
 ) -> Generator[dict[str, gm.Point], None, None]:
   """Match any generic rule that is not one of the above match_*() rules."""
-  debugname(theorem)
+  #debugname(theorem)
   ta =time.time()
   clause2enum = {}
 
@@ -1398,7 +1398,7 @@ def match_generic(
     yield mapping
 
   tb =time.time()
-  print(tb-ta)
+  #print(tb-ta)
 
 def match_test(
     g: gh.Graph,
@@ -1618,11 +1618,14 @@ def bfs_one_level(
         break
       name, args = theorem.conclusion_name_args(mp)
       hash_conclusion = pr.hashed(name, args)
+      #print(hash_conclusion)
       if hash_conclusion in g.cache:
         continue
 
       add = g.add_piece(name, args, deps=deps)
       added += add
+      print("lets cache", hash_conclusion)
+      g.cache_dep(name, args, deps)
 
   branching = len(added)
 
@@ -1641,16 +1644,13 @@ def bfs_one_level(
 
     if g.check(controller.goal.name, args):
       return added, {}, {}, branching
-
   # Run AR, but do NOT apply to the proof state (yet).
   for dep in added:
-    print("dep",dep)
     g.add_algebra(dep, level)
   derives, eq4s = g.derive_algebra(level, verbose=False)
-
+  
   branching += sum([len(x) for x in derives.values()])
   branching += sum([len(x) for x in eq4s.values()])
-
 
   return added, derives, eq4s, branching
 
