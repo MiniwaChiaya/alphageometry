@@ -1,24 +1,12 @@
 
 ==========================
  * From theorem premises:
-A B C D E F G H I J : Points
-DB = DC [00]
-DA = DB [01]
-DE = DA [02]
-DF = DA [03]
-DG = DA [04]
-H,B,A are collinear [05]
-H,F,E are collinear [06]
-I,B,C are collinear [07]
-F,G,I are collinear [08]
-J,G,A are collinear [09]
-J,E,C are collinear [10]
+: Points
+
 
  * Auxiliary Constructions:
 : Points
 
 
  * Proof steps:
-001. DB = DC [00] & DA = DB [01] & DG = DA [04] & DE = DA [02] & DF = DA [03] ⇒  C,B,G,F,A,E are concyclic [11]
-002. C,B,G,F,A,E are concyclic [11] & I,B,C are collinear [07] & F,G,I are collinear [08] & H,B,A are collinear [05] & H,F,E are collinear [06] & J,G,A are collinear [09] & J,E,C are collinear [10] ⇒  J,H,I are collinear
 ==========================

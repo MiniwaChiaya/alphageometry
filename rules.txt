@@ -50,3 +50,4 @@ circle O A B C, cong O A O D, cong O A O E, perp O A A G, coll G C D, coll H A B
 circle O A B C, cong O A O D, perp O A A G, coll G B C, coll H A B, coll H C D, perp O B B I, coll I D A => coll G H I
 circle O A B C, cong O A O D, perp O A A G, perp O B B G, coll H A C, coll H B D, coll I C B, coll I D A => coll G H I
 circle O A B C, cong O A O D, cong O A O E, coll G A B, coll G D E, coll H B C, coll H E F, coll I C D, coll I F A, coll G H I => cong O A O F
+coll A F B, coll B D C, coll C E A, onseg A F B, onseg B D C, onseg C E A, coll B P E, coll C P F, coll A P D => eqratio30 A F F B B D D C C E E A

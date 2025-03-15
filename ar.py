@@ -609,7 +609,7 @@ class RatioTable(GeometricTable):
       dep: pr.Dependency,
   ) -> None:
     lp, l1, l2 = self.get_name([lp, l1, l2])
-    return self.add_eq5(lp, l1, l2, dep)
+    return super().add_eq5(lp, l1, l2, dep)
 
   def get_all_eqs_and_why(self) -> Generator[Any, None, None]:
     return super().get_all_eqs_and_why(True)

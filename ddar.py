@@ -45,7 +45,7 @@ def saturate_or_goal(
 
   while len(level_times) < max_level:
     level = len(level_times) + 1
-
+    print(f"hello from {level}")
     t = time.time()
     added, derv, eq4, n_branching = dd.bfs_one_level(
         g, theorems, level, p, verbose=False, nm_check=True, timeout=timeout

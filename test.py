@@ -1,6 +1,8 @@
-a = 'bbcc'
-b = 'abc'
+def chiaya():
+    n = 0
+    while n < 10:
+        n += 1
+        yield n
 
-a, b = b, a
-
-print(type(a) == str)
+kirine = chiaya()
+print(kirine)

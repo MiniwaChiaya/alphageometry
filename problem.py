@@ -969,8 +969,11 @@ class Dependency(Construction):
         elif ab._val and cd._val and mn._val and pq._val:
           self.why = why_eqangle(ab._val, cd._val, mn._val, pq._val, level)
 
-    elif self.name in ['diff', 'npara', 'nperp', 'ncoll', 'sameside']:
+    elif self.name in ['diff', 'npara', 'nperp', 'ncoll', 'sameside', 'onseg']:
       self.why = []
+
+    elif self.name == 'eqratio30':
+      assert False
 
     elif self.name == 'simtri':
       a, b, c, x, y, z = self.args
@@ -1127,7 +1130,7 @@ def hashed_txt(name: str, args: list[str]) -> tuple[str, ...]:
     (a, b), (c, d) = sorted([(a, b), (c, d)], key=sorted)
     return (name, a, b, c, d, o, o)
 
-  if name in ['sameside', 's_angle']:
+  if name in ['sameside', 's_angle', 'onseg']:
     return (name,) + tuple(args)
 
   if name in ['eqratio30']:

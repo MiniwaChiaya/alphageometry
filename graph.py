@@ -194,6 +194,7 @@ class Graph:
       return
 
     name, args = dep.name, dep.args
+    print(name, args)
 
     if name == 'para':
       ab, cd = dep.algebra
@@ -234,7 +235,8 @@ class Graph:
       ab, cd = dep.algebra
       self.rtable.add_eq(ab, cd, dep)
     
-    if name == 'eqratio30':
+    if name == 'eqratio30': # TODO
+      #print(dep.algebra)
       ab, cd, mn, pq, xy, zw = dep.algebra
       pq_zw, why1 = self._get_or_create_length_pro_l(pq, zw, deps=None)
       mn_xy, why2 = self._get_or_create_length_pro_l(mn, xy, deps=None)
@@ -860,6 +862,8 @@ class Graph:
       return self.check_contri(args)
     if name == 'sameside':
       return self.check_sameside(args)
+    if name == 'onseg':
+      return self.check_onseg(args)
     if name in 'diff':
       a, b = args
       return not a.num.close(b.num)
@@ -1048,6 +1052,9 @@ class Graph:
 
   def check_sameside(self, points: list[Point]) -> bool:
     return nm.check_sameside([p.num for p in points])
+
+  def check_onseg(self, points: list[Point]) -> bool:
+    return nm.check_onseg([p.num for p in points])
 
   def make_equal(self, x: gm.Node, y: gm.Node, deps: Dependency) -> None:
     """Make that two nodes x and y are equal, i.e. merge their value node."""
@@ -1739,7 +1746,7 @@ class Graph:
   def make_equal_pairs30(
       self,
       a: Point,b: Point,c: Point,d: Point,m: Point,n: Point,p: Point,q: Point,x: Point,y: Point,z: Point,w: Point,
-      ab: Line,cd: Line,mn: Line,pq: Line,xy: Line, zw: Line,
+      ab: Segment, cd: Segment, mn: Segment, pq: Segment, xy: Segment, zw: Segment,
       deps: EmptyDependency,
   ) -> list[Dependency]:
     """Add ab/cd * mn/pq * xy/zw = 1 in case either 1 up and 1 down are equal."""
@@ -1748,7 +1755,7 @@ class Graph:
     eqname = 'cong'
 
     mn_pq, pq_mn, why1 = self._get_or_create_ratio(mn, pq, deps=None)
-    xy_zw, zw_xy, why2 = self._get_or_create_ratio(ab, cd, deps=None)
+    xy_zw, zw_xy, why2 = self._get_or_create_ratio(xy, zw, deps=None)
 
     if ab != cd:
       dep0 = deps.populate(depname, [a, b, c, d, m, n, p, q, x, y, z, w])
@@ -1783,7 +1790,7 @@ class Graph:
   def maybe_make_equal_pairs30(
       self,
       a: Point,b: Point,c: Point,d: Point,m: Point,n: Point,p: Point,q: Point,x: Point,y: Point,z: Point,w: Point,
-      ab: Line,cd: Line,mn: Line,pq: Line,xy: Line, zw: Line,
+      ab: Segment, cd: Segment, mn: Segment, pq: Segment, xy: Segment, zw: Segment,
       deps: EmptyDependency,
   ) -> Optional[list[Dependency]]:
     """Add ab/cd * mn/pq * xy/zw = 1 in case maybe either 1 up and 1 down are equal."""
@@ -2536,20 +2543,23 @@ class Graph:
     pq = self._get_or_create_segment(p, q, deps=None)
     xy = self._get_or_create_segment(x, y, deps=None)
     zw = self._get_or_create_segment(z, w, deps=None)
-
-    add = self.maybe_make_equal_pairs30(
-        a, b, c, d, m, n, p, q, x, y, z, w, ab, cd, mn, pq, xy, zw, deps
-    )
-
-    if add is not None:
-      return add
-
+    
     self.connect_val(ab, deps=None)
     self.connect_val(cd, deps=None)
     self.connect_val(mn, deps=None)
     self.connect_val(pq, deps=None)
     self.connect_val(xy, deps=None)
     self.connect_val(zw, deps=None)
+
+    add = self.maybe_make_equal_pairs30(
+        a, b, c, d, m, n, p, q, x, y, z, w, ab, cd, mn, pq, xy, zw, deps
+    )
+
+    if add is not None:
+      dp = add[0]
+      print(dp.name, [aug.name for aug in dp.args])
+      return add
+
 
     add = []
     if ab.val == cd.val:
@@ -2571,6 +2581,7 @@ class Graph:
     if xy.val == zw.val:
       add += self.add_eqratio([a, b, c, d, p, q, m, n], deps)
     if add != []:
+      assert False , "2"
       return add
     add += self._add_eqratio30(a, b, c, d, m, n, p, q, x, y, z, w, ab, cd, mn, pq, xy, zw, deps)
     add += self._add_eqratio30(a, b, p, q, m, n, c, d, x, y, z, w, ab, pq, mn, cd, xy, zw, deps)
@@ -2581,6 +2592,7 @@ class Graph:
     add += self._add_eqratio30(x, y, c, d, a, b, p, q, m, n, z, w, xy, cd, ab, pq, mn, zw, deps)
     add += self._add_eqratio30(x, y, p, q, a, b, c, d, m, n, z, w, xy, pq, ab, cd, mn, zw, deps)
     add += self._add_eqratio30(x, y, z, w, a, b, c, d, m, n, p, q, xy, zw, ab, cd, mn, pq, deps)
+    assert False, "3"
     return add
 
   def check_rconst(self, points: list[Point], verbose: bool = False) -> bool:

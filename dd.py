@@ -545,6 +545,60 @@ def match_power2cyclic(
             yield dict(zip('PABCD', [p, a, b, c, d]))
   #tb =time.time()
   #print("p2c",tb-ta)
+
+def match_ceva(
+    g: gh.Graph,
+    g_matcher: Callable[str, list[tuple[gm.Point, ...]]],
+    theorem: pr.Theorem,
+) -> Generator[dict[str, gm.Point], None, None]:
+  """Match coll A F B, coll B D C, coll C E A, onseg A F B, onseg B D C, onseg C E A, coll B P E, coll C P F, coll A P D => eqratio30 A F F B B D D C C E E A"""
+  #print("ceva")
+  recordl = set()
+  ta = time.time()
+  all_lines = g.type2nodes[gm.Line]
+  for l1,l2,l3 in utils.comb3(all_lines):
+      l1s = l1.neighbors(gm.Point, return_set=True)
+      l2s = l2.neighbors(gm.Point, return_set=True)
+      l3s = l3.neighbors(gm.Point, return_set=True)
+      # l1: bc, l2: ca, l3: ab
+      a = intersect1(l2s,l3s)
+      b = intersect1(l1s,l3s)
+      c = intersect1(l1s,l2s)
+      if not (a and b and c):
+        continue
+      if (a, b, c) in recordl:
+        continue
+      recordl.add((a, b, c))
+      recordl.add((a, c, b))
+      recordl.add((b, a, c))
+      recordl.add((b, c, a))
+      recordl.add((c, a, b))
+      recordl.add((c, b, a))
+      recordp = set()
+      for d, e, f in utils.cross3(l1s, l2s, l3s):
+        if (d, e, f) in recordp:
+          continue
+        recordp.add((d, e, f))
+        recordp.add((d, f, e))
+        recordp.add((e, d, f))
+        recordp.add((e, f, d))
+        recordp.add((f, d, e))
+        recordp.add((f, e, d))
+        if not (g.check_onseg([d, b, c]) and g.check_onseg([e, c, a]) and g.check_onseg([f, a, b])):
+          continue
+        ad = g._get_line(a, d)
+        be = g._get_line(b, e)
+        if not (ad and be):
+          continue
+        ads = ad.neighbors(gm.Point, return_set=True)
+        bes = be.neighbors(gm.Point, return_set=True)
+        p = intersect1(ads, bes)
+        if g.check_coll([p, c, f]):
+          #debugname([p, a, b, c, d, e, f])
+          yield dict(zip('PABCDEF', [p, a, b, c, d, e, f]))
+  tb = time.time()
+  #print(tb-ta)
+
           
 def match_pascal6(
     g: gh.Graph,
@@ -876,6 +930,9 @@ def match_radical_axis(
           yield dict(zip('ABCDEFP',[c,d,e,f,a,b,p3]))
   #tb =time.time()
   #print(tb-ta)
+
+
+
   
 def rotate_simtri(
     a: gm.Point, b: gm.Point, c: gm.Point, x: gm.Point, y: gm.Point, z: gm.Point
@@ -1213,7 +1270,7 @@ def match_all(
     name: str, g: gh.Graph
 ) -> Generator[tuple[gm.Point, ...], None, None]:
   """Match all instances of a certain relation."""
-  if name in ['ncoll', 'npara', 'nperp']:
+  if name in ['ncoll', 'npara', 'nperp', 'onseg']:
     return []
   if name == 'coll':
     return g.all_colls()
@@ -1295,14 +1352,14 @@ def match_generic(
     theorem: pr.Theorem
 ) -> Generator[dict[str, gm.Point], None, None]:
   """Match any generic rule that is not one of the above match_*() rules."""
-  #debugname(theorem)
-  #ta =time.time()
+  debugname(theorem)
+  ta =time.time()
   clause2enum = {}
 
   clauses = []
   numerical_checks = []
   for clause in theorem.premise:
-    if clause.name in ['ncoll', 'npara', 'nperp', 'sameside']:
+    if clause.name in ['ncoll', 'npara', 'nperp', 'sameside', 'onseg']:
       numerical_checks.append(clause)
       continue
 
@@ -1331,6 +1388,8 @@ def match_generic(
         checks_ok = g.check_nperp(args)
       elif check.name == 'sameside':
         checks_ok = g.check_sameside(args)
+      elif check.name == 'onseg':
+        checks_ok = g.check_onseg(args)
       if not checks_ok:
         break
     if not checks_ok:
@@ -1338,59 +1397,8 @@ def match_generic(
 
     yield mapping
 
-  #tb =time.time()
-  #print(tb-ta)
-
-
-def match_generic_debug(
-    g: gh.Graph,
-    cache: Callable[str, list[tuple[gm.Point, ...]]],
-    theorem: pr.Theorem
-) -> Generator[dict[str, gm.Point], None, None]:
-  """Match any generic rule that is not one of the above match_*() rules."""
-  
-  tchiaya = time.time()
-  clause2enum = {}
-  clauses = []
-  numerical_checks = []
-  for clause in theorem.premise:
-    if clause.name in ['ncoll', 'npara', 'nperp', 'sameside']:
-      numerical_checks.append(clause)
-      continue
-
-    enum = cache(clause.name)
-    if len(enum) == 0:  # pylint: disable=g-explicit-length-test
-      return 0
-
-    clause2enum[clause] = enum
-    clauses.append((len(set(clause.args)), clause))
-
-  clauses = sorted(clauses, key=lambda x: x[0], reverse=True)
-  _, clauses = zip(*clauses)
-
-  for mapping in try_to_map([(c, clause2enum[c]) for c in clauses], {}):
-    if not mapping:
-      continue
-
-    checks_ok = True
-    for check in numerical_checks:
-      args = [mapping[a] for a in check.args]
-      if check.name == 'ncoll':
-        checks_ok = g.check_ncoll(args)
-      elif check.name == 'npara':
-        checks_ok = g.check_npara(args)
-      elif check.name == 'nperp':
-        checks_ok = g.check_nperp(args)
-      elif check.name == 'sameside':
-        checks_ok = g.check_sameside(args)
-      if not checks_ok:
-        break
-    if not checks_ok:
-      continue
-
-    yield mapping
-  tkirine = time.time()
-  #print(theorem.name,tkirine-tchiaya)
+  tb =time.time()
+  print(tb-ta)
 
 def match_test(
     g: gh.Graph,
@@ -1451,6 +1459,7 @@ BUILT_IN_FNS = {
     'circle_cong_perp_coll_coll_coll_perp_coll_coll' : match_pascal41,
     'circle_cong_perp_perp_coll_coll_coll_coll_coll' : match_pascal42,
     'circle_cong_cong_coll_coll_coll_coll_coll_coll_coll_cong' : match_pascal6_rev,
+    'coll_coll_coll_onseg_onseg_onseg_coll_coll_coll_eqratio30' : match_ceva,
     #'circle_perp_coll_eqratio': match_generic_debug,
     #'cyclic_cyclic_cong': match_test,
 }
@@ -1487,6 +1496,7 @@ def match_one_theorem(
     mps = match_generic(g, cache, theorem)
 
   mappings = []
+  cnt = 0
   for mp in mps:
     mappings.append(mp)
     if len(mappings) > MAX_BRANCH:  # cap branching at this number.
@@ -1634,11 +1644,13 @@ def bfs_one_level(
 
   # Run AR, but do NOT apply to the proof state (yet).
   for dep in added:
+    print("dep",dep)
     g.add_algebra(dep, level)
   derives, eq4s = g.derive_algebra(level, verbose=False)
 
   branching += sum([len(x) for x in derives.values()])
   branching += sum([len(x) for x in eq4s.values()])
+
 
   return added, derives, eq4s, branching
 

@@ -41,7 +41,7 @@ INPUT_FILE=pros2.txt
 python -m alphageometry \
 --alsologtostderr \
 --problems_file=$(pwd)/$INPUT_FILE \
---problem_name=test_gcenter \
+--problem_name=test_gcenter1 \
 --mode=alphageometry \
 "${DDAR_ARGS[@]}" \
 "${SEARCH_ARGS[@]}" \
