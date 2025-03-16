@@ -5,4 +5,5 @@ AA BC / AB CD / BB DA
 A A C B B D
 AA BB / AC BD / CB DA
 
-coll A F B, coll B D C, coll C E A, coll B P E, coll C P F, eqratio30 A F F B B D D C C E E A => coll A P D
+coll A F B, coll B D C, coll C E A, onseg A F B, onseg B D C, onseg C E A, coll B P E, coll C P F, eqratio30 A F F B B D D C C E E A => coll A P D
+coll A F B, coll B D C, coll C E A, onseg A F B, onseg B C D, onseg C E A, coll D E F => eqratio30 A F F B B D D C C E E A

@@ -42,3 +42,7 @@ test_icenter1
 a b c = triangle a b c; d = angle_bisector d b a c, on_line d b c; e = angle_bisector e a b c, on_line e a c; i = on_line i a d, on_line i b e; f = on_line f c i, on_line f a b ? eqangle c a c f c f c b
 example2_1
 a b c = triangle a b c; d = foot d a b c; h = on_line h a d; e = on_line e a c, on_line e b h; f = on_line f a b, on_line f c h; p = on_pline p a b c, on_line p d f; q = on_line q p a, on_line q d e ? cong a p a q
+test_menelaus
+a b c = triangle a b c; d = midpoint d b c; e = on_line e c a; f = on_line f a b, on_line f d e ? eqratio c e e a b f f a
+exercise20_2
+a b = segment; o = midpoint o a b; c = on_bline c a b, on_circle c o a; m = midpoint b c; d = foot d c a m; e = on_line e c d, on_line e a b; n = midpoint n a e ? cong a n b e

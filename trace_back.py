@@ -157,7 +157,7 @@ def recursive_traceback(
     if hashed in visited:
       return
 
-    if hashed[0] in ['ncoll', 'npara', 'nperp', 'diff', 'sameside', "onseg"]:
+    if hashed[0] in ['ncoll', 'npara', 'nperp', 'diff', 'sameside', 'onseg', 'offseg']:
       return
 
     nonlocal stack

@@ -113,4 +113,7 @@ Traceback (most recent call last):
     nl = proof_step_string(step, refs, last_step=i == len(proof_steps) - 1)
   File "/home/featurize/work/alphageometry/alphageometry.py", line 125, in proof_step_string
     conclusion_nl += ' [{:02}]'.format(refs[conclusion.hashed()])
-TypeError: unsupported operand type(s) for +=: 'NoneType' and 'str'
+TypeError: unsupported operand type(s) for +=: 'NoneType' and 'str'''
+
+exercise20_2
+a b = segment; o = midpoint n a b; c = on_tline c o a b, on_circle c o a; m = midpoint b c; d = foot d c a m; e = on_line e c d, on_line e a b; n = midpoint n a e ? cong a n b e

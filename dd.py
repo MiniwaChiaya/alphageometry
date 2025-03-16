@@ -599,6 +599,119 @@ def match_ceva(
   tb = time.time()
   #print(tb-ta)
 
+def match_ceva_rev(
+    g: gh.Graph,
+    g_matcher: Callable[str, list[tuple[gm.Point, ...]]],
+    theorem: pr.Theorem,
+) -> Generator[dict[str, gm.Point], None, None]:
+  """Match coll A F B, coll B D C, coll C E A, onseg A F B, onseg B D C, onseg C E A, coll B P E, coll C P F, eqratio30 A F F B B D D C C E E A => coll A P D"""
+  print("ceva")
+  recordl = set()
+  ta = time.time()
+  all_lines = g.type2nodes[gm.Line]
+  for l1,l2,l3 in utils.comb3(all_lines):
+      l1s = l1.neighbors(gm.Point, return_set=True)
+      l2s = l2.neighbors(gm.Point, return_set=True)
+      l3s = l3.neighbors(gm.Point, return_set=True)
+      # l1: bc, l2: ca, l3: ab
+      a = intersect1(l2s,l3s)
+      b = intersect1(l1s,l3s)
+      c = intersect1(l1s,l2s)
+      if not (a and b and c):
+        continue
+      if (a, b, c) in recordl:
+        continue
+      recordl.add((a, b, c))
+      recordl.add((a, c, b))
+      recordl.add((b, a, c))
+      recordl.add((b, c, a))
+      recordl.add((c, a, b))
+      recordl.add((c, b, a))
+      recordp = set()
+      for d, e, f in utils.cross3(l1s, l2s, l3s):
+        if (d, e, f) in recordp:
+          continue
+        recordp.add((d, e, f))
+        recordp.add((d, f, e))
+        recordp.add((e, d, f))
+        recordp.add((e, f, d))
+        recordp.add((f, d, e))
+        recordp.add((f, e, d))
+        if not (g.check_onseg([d, b, c]) and g.check_onseg([e, c, a]) and g.check_onseg([f, a, b])):
+          continue
+        if g.check_eqratio30([a, f, f, b, b, d, d, c, c, e, e, a]):
+          ad = g._get_line(a, d)
+          be = g._get_line(b, e)
+          cf = g._get_line(c, f)
+          if ad and be:
+            ads = ad.neighbors(gm.Point, return_set=True)
+            bes = be.neighbors(gm.Point, return_set=True)
+            pab = intersect1(ads, bes)
+            if pab:
+              debugname([pab, c, a, b, f, d, e])
+              yield dict(zip('PABCDEF', [pab, c, a, b, f, d, e]))
+          if be and cf:
+            bes = be.neighbors(gm.Point, return_set=True)
+            cfs = cf.neighbors(gm.Point, return_set=True)
+            pbc = intersect1(bes, cfs)
+            if pbc:
+              debugname([pbc, a, b, c, d, e, f])
+              yield dict(zip('PABCDEF', [pbc, a, b, c, d, e, f]))
+          if cf and ad:
+            cfs = cf.neighbors(gm.Point, return_set=True)
+            ads = ad.neighbors(gm.Point, return_set=True)
+            pca = intersect1(cfs, ads)
+            if pca:
+              debugname([pca, b, c, a, e, f, d])
+              yield dict(zip('PABCDEF', [pca, b, c, a, e, f, d]))
+  tb = time.time()
+  print(tb-ta)
+
+def match_menelaus(
+    g: gh.Graph,
+    g_matcher: Callable[str, list[tuple[gm.Point, ...]]],
+    theorem: pr.Theorem,
+) -> Generator[dict[str, gm.Point], None, None]:
+  """Match coll A F B, coll B D C, coll C E A, onseg A F B, offseg B D C, onseg C E A, coll D E F => eqratio30 A F F B B D D C C E E A"""
+  #print("ceva")
+  recordl = set()
+  ta = time.time()
+  all_lines = g.type2nodes[gm.Line]
+  for l1,l2,l3 in utils.comb3(all_lines):
+      l1s = l1.neighbors(gm.Point, return_set=True)
+      l2s = l2.neighbors(gm.Point, return_set=True)
+      l3s = l3.neighbors(gm.Point, return_set=True)
+      # l1: bc, l2: ca, l3: ab
+      a = intersect1(l2s,l3s)
+      b = intersect1(l1s,l3s)
+      c = intersect1(l1s,l2s)
+      if not (a and b and c):
+        continue
+      if (a, b, c) in recordl:
+        continue
+      recordl.add((a, b, c))
+      recordl.add((a, c, b))
+      recordl.add((b, a, c))
+      recordl.add((b, c, a))
+      recordl.add((c, a, b))
+      recordl.add((c, b, a))
+      recordp = set()
+      for d, e, f in utils.cross3(l1s, l2s, l3s):
+        if (d, e, f) in recordp:
+          continue
+        recordp.add((d, e, f))
+        recordp.add((d, f, e))
+        recordp.add((e, d, f))
+        recordp.add((e, f, d))
+        recordp.add((f, d, e))
+        recordp.add((f, e, d))
+        if d in {b, c} or e in {c, a} or f in {a, b}:
+          continue
+        if g.check_coll([d, e, f]):
+          debugname([a, b, c, d, e, f])
+          yield dict(zip('ABCDEF', [a, b, c, d, e, f]))
+  tb = time.time()
+  print(tb-ta)
           
 def match_pascal6(
     g: gh.Graph,
@@ -1270,7 +1383,7 @@ def match_all(
     name: str, g: gh.Graph
 ) -> Generator[tuple[gm.Point, ...], None, None]:
   """Match all instances of a certain relation."""
-  if name in ['ncoll', 'npara', 'nperp', 'onseg']:
+  if name in ['ncoll', 'npara', 'nperp', 'onseg', 'offseg']:
     return []
   if name == 'coll':
     return g.all_colls()
@@ -1359,7 +1472,7 @@ def match_generic(
   clauses = []
   numerical_checks = []
   for clause in theorem.premise:
-    if clause.name in ['ncoll', 'npara', 'nperp', 'sameside', 'onseg']:
+    if clause.name in ['ncoll', 'npara', 'nperp', 'sameside', 'onseg', 'offseg']:
       numerical_checks.append(clause)
       continue
 
@@ -1390,6 +1503,8 @@ def match_generic(
         checks_ok = g.check_sameside(args)
       elif check.name == 'onseg':
         checks_ok = g.check_onseg(args)
+      elif check.name == 'offseg':
+        checks_ok = g.check_offseg(args)
       if not checks_ok:
         break
     if not checks_ok:
@@ -1398,7 +1513,7 @@ def match_generic(
     yield mapping
 
   tb =time.time()
-  #print(tb-ta)
+  print(tb-ta)
 
 def match_test(
     g: gh.Graph,
@@ -1460,6 +1575,8 @@ BUILT_IN_FNS = {
     'circle_cong_perp_perp_coll_coll_coll_coll_coll' : match_pascal42,
     'circle_cong_cong_coll_coll_coll_coll_coll_coll_coll_cong' : match_pascal6_rev,
     'coll_coll_coll_onseg_onseg_onseg_coll_coll_coll_eqratio30' : match_ceva,
+    'coll_coll_coll_onseg_onseg_onseg_coll_coll_eqratio30_coll' : match_ceva_rev,
+    'coll_coll_coll_coll_eqratio30' : match_menelaus,
     #'circle_perp_coll_eqratio': match_generic_debug,
     #'cyclic_cyclic_cong': match_test,
 }
@@ -1587,23 +1704,28 @@ def bfs_one_level(
             )
             if not nm.same_clock(a.num, b.num, c.num, x.num, y.num, z.num):
               p_args = b, a, b, c, y, z, y, x
-
+        #print("a")
         dep = Dependency(p.name, p_args, rule_name='', level=level)
         try:
+          #print("b")
           dep = dep.why_me_or_cache(g, level)
         except:  # pylint: disable=bare-except
+          #print("c")
           fail = True
           break
 
         if dep.why is None:
+          #print("d")
           fail = True
           break
+        #print("e")
         g.cache_dep(p.name, p_args, dep)
         deps.why.append(dep)
 
       if fail:
+        #print("f")
         continue
-
+      #print("g")
       mp_deps.append((mp, deps))
     theorem2deps[theorem] = mp_deps
 
@@ -1624,7 +1746,7 @@ def bfs_one_level(
 
       add = g.add_piece(name, args, deps=deps)
       added += add
-      print("lets cache", hash_conclusion)
+      #print("lets cache", hash_conclusion)
       g.cache_dep(name, args, deps)
 
   branching = len(added)

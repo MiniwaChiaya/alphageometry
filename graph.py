@@ -866,6 +866,8 @@ class Graph:
       return self.check_sameside(args)
     if name == 'onseg':
       return self.check_onseg(args)
+    if name == 'offseg':
+      return self.check_offseg(args)
     if name in 'diff':
       a, b = args
       return not a.num.close(b.num)
@@ -1057,6 +1059,9 @@ class Graph:
 
   def check_onseg(self, points: list[Point]) -> bool:
     return nm.check_onseg([p.num for p in points])
+
+  def check_offseg(self, points: list[Point]) -> bool:
+    return nm.check_offseg([p.num for p in points])
 
   def make_equal(self, x: gm.Node, y: gm.Node, deps: Dependency) -> None:
     """Make that two nodes x and y are equal, i.e. merge their value node."""
@@ -2239,6 +2244,8 @@ class Graph:
     r21.opposite = r12
     return r12, r21, why1 + why2
 
+
+
   def _get_or_create_length_pro(
       self, s1: Segment, s2: Segment, deps: Dependency
   ) -> tuple[Ratio, Ratio, list[Dependency]]:
@@ -2767,6 +2774,98 @@ class Graph:
       for rat2, _, _ in gm.all_ratios(mn._val, pq._val):
         if self.is_equal(rat1, rat2):
           return True
+    return False
+
+  def check_eqratio30(self, points: list[Point]) -> bool:
+    """Check if 12 points make an eqratio30 predicate."""
+    a, b, c, d, m, n, p, q, x, y, z, w = points
+
+    if {a, b} == {c, d}:
+      return self.check_eqratio([m, n, p, q, z, w, x, y])
+    if {a, b} == {p, q}:
+      return self.check_eqratio([m, n, c, d, z, w, x, y])
+    if {a, b} == {z, w}:
+      return self.check_eqratio([m, n, p, q, c, d, x, y])
+    if {m, n} == {c, d}:
+      return self.check_eqratio([a, b, p, q, z, w, x, y])
+    if {m, n} == {p, q}:
+      return self.check_eqratio([a, b, c, d, z, w, x, y])
+    if {m, n} == {z, w}:
+      return self.check_eqratio([a, b, p, q, c, d, x, y])     
+    if {x, y} == {c, d}:
+      return self.check_eqratio([a, b, p, q, z, w, m, n])
+    if {x, y} == {p, q}:
+      return self.check_eqratio([a, b, c, d, z, w, m, n])
+    if {x, y} == {z, w}:
+      return self.check_eqratio([a, b, p, q, c, d, m, n])
+
+    #print("1")
+
+    ab = self._get_segment(a, b)
+    cd = self._get_segment(c, d)
+    mn = self._get_segment(m, n)
+    pq = self._get_segment(p, q)
+    xy = self._get_segment(x, y)
+    zw = self._get_segment(z, w)
+    #print("2")
+
+    if {a, b} == {c, d} and mn and pq and xy and zw and ((self.is_equal(mn, pq) and self.is_equal(xy, zw)) or (self.is_equal(mn, zw) and self.is_equal(xy, pq))):
+      return True
+    if {a, b} == {p, q} and mn and cd and xy and zw and ((self.is_equal(mn, cd) and self.is_equal(xy, zw)) or (self.is_equal(mn, zw) and self.is_equal(xy, cd))):
+      return True
+    if {a, b} == {z, w} and mn and pq and xy and cd and ((self.is_equal(mn, pq) and self.is_equal(xy, cd)) or (self.is_equal(mn, cd) and self.is_equal(xy, pq))):
+      return True
+    if {m, n} == {c, d} and ab and pq and xy and zw and ((self.is_equal(ab, pq) and self.is_equal(xy, zw)) or (self.is_equal(ab, zw) and self.is_equal(xy, pq))):
+      return True
+    if {m, n} == {p, q} and ab and cd and xy and zw and ((self.is_equal(ab, cd) and self.is_equal(xy, zw)) or (self.is_equal(ab, zw) and self.is_equal(xy, cd))):
+      return True
+    if {m, n} == {z, w} and ab and pq and xy and cd and ((self.is_equal(ab, pq) and self.is_equal(xy, cd)) or (self.is_equal(ab, cd) and self.is_equal(xy, pq))):
+      return True
+    if {x, y} == {c, d} and mn and pq and ab and zw and ((self.is_equal(mn, pq) and self.is_equal(ab, zw)) or (self.is_equal(mn, zw) and self.is_equal(ab, pq))):
+      return True
+    if {x, y} == {p, q} and mn and cd and ab and zw and ((self.is_equal(mn, cd) and self.is_equal(ab, zw)) or (self.is_equal(mn, zw) and self.is_equal(ab, cd))):
+      return True
+    if {x, y} == {z, w} and mn and pq and ab and cd and ((self.is_equal(mn, pq) and self.is_equal(ab, cd)) or (self.is_equal(mn, cd) and self.is_equal(ab, pq))):
+      return True
+    #print("3")
+    if not (ab and cd and mn and pq and xy and zw):
+      return False
+    #print("4")
+    if self.is_equal(ab, cd) and ((self.is_equal(mn, pq) and self.is_equal(xy, zw)) or (self.is_equal(mn, zw) and self.is_equal(xy, pq))):
+      return True
+    if self.is_equal(ab, pq) and ((self.is_equal(mn, cd) and self.is_equal(xy, zw)) or (self.is_equal(mn, zw) and self.is_equal(xy, cd))):
+      return True
+    if self.is_equal(ab, zw) and ((self.is_equal(mn, pq) and self.is_equal(xy, cd)) or (self.is_equal(mn, cd) and self.is_equal(xy, pq))):
+      return True
+    if self.is_equal(mn, cd) and ((self.is_equal(ab, pq) and self.is_equal(xy, zw)) or (self.is_equal(ab, zw) and self.is_equal(xy, pq))):
+      return True
+    if self.is_equal(mn, pq) and ((self.is_equal(ab, cd) and self.is_equal(xy, zw)) or (self.is_equal(ab, zw) and self.is_equal(xy, cd))):
+      return True
+    if self.is_equal(mn, zw) and ((self.is_equal(ab, pq) and self.is_equal(xy, cd)) or (self.is_equal(ab, cd) and self.is_equal(xy, pq))):
+      return True
+    if self.is_equal(xy, cd) and ((self.is_equal(mn, pq) and self.is_equal(ab, zw)) or (self.is_equal(mn, zw) and self.is_equal(ab, pq))):
+      return True
+    if self.is_equal(xy, pq) and ((self.is_equal(mn, cd) and self.is_equal(ab, zw)) or (self.is_equal(mn, zw) and self.is_equal(ab, cd))):
+      return True
+    if self.is_equal(xy, zw) and ((self.is_equal(mn, pq) and self.is_equal(ab, cd)) or (self.is_equal(mn, cd) and self.is_equal(ab, pq))):
+      return True
+    #print("5")
+    if not (ab.val and cd.val and mn.val and pq.val and xy.val and zw.val):
+      return False
+    #print("6")
+    if Multiset([ab.val, mn.val, xy.val]) == Multiset([cd.val, pq.val, zw.val]):
+      return True
+    #print("7")
+
+    pq_zw, _ = self._get_or_create_length_pro(pq, zw, deps=None)
+    mn_xy, _ = self._get_or_create_length_pro(mn, xy, deps=None)
+
+    for rat1, _, _ in gm.all_ratios(ab._val, cd._val):
+      for rat2, _, _ in gm.all_ratios2(pq_zw._val, mn_xy._val):
+        if self.is_equal(rat1, rat2):
+          return True
+
+    #print("8")
     return False
 
   def add_simtri_check(

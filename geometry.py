@@ -574,17 +574,28 @@ def all_angles(
 
 
 def all_ratios(
-    d1, d2, level=None
-) -> tuple[Angle, list[Direction], list[Direction]]:
+    l1: Length, l2: Length, level=None
+) -> tuple[Ratio, list[Length], list[Length]]:
   level = level or float('inf')
-  d1s = d1.equivs_upto(level)
-  d2s = d2.equivs_upto(level)
+  l1s = l1.equivs_upto(level)
+  l2s = l2.equivs_upto(level)
 
-  for ang in d1.rep().neighbors(Ratio):
-    d1_, d2_ = ang._l
-    if d1_ in d1s and d2_ in d2s:
-      yield ang, d1s, d2s
+  for rat in l1.rep().neighbors(Ratio):
+    l1_, l2_ = rat._l
+    if l1_ in l1s and l2_ in l2s:
+      yield rat, l1s, l2s
 
+def all_ratios2(
+    lp1: Length_Pro, lp2: Length_Pro, level=None
+) -> tuple[Ratio_Pro, list[Length_Pro], list[Length_Pro]]:
+  level = level or float('inf')
+  lp1s = lp1.equivs_upto(level)
+  lp2s = lp2.equivs_upto(level)
+
+  for ratp in lp1.rep().neighbors(Ratio_Pro):
+    lp1_, lp2_ = ratp._l
+    if lp1_ in lp1s and lp2_ in lp2s:
+      yield ratp, lp1s, lp2s
 
 RANKING = {
     Point: 0,

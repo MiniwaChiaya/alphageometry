@@ -685,7 +685,12 @@ def check_onseg(points: list[Point]) -> bool:
   bc = b - c
   return ba.dot(bc) < 0
 
-
+def check_offseg(points: list[Point]) -> bool:
+  b, a, c = points
+  # whether c is on segment ab or a is on segment bc
+  ba = b - a
+  bc = b - c
+  return ba.dot(bc) > 0
 
 def check_para_or_coll(points: list[Point]) -> bool:
   return check_para(points) or check_coll(points)

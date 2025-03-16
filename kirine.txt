@@ -1,28 +1,18 @@
 
 ==========================
  * From theorem premises:
-A B C D E F G H I : Points
-B,D,C are collinear [00]
-D,A,E are collinear [01]
-F,A,C are collinear [02]
-B,F,E are collinear [03]
-B,A,G are collinear [04]
-G,E,C are collinear [05]
-HA ∥ BC [06]
-D,H,G are collinear [07]
-H,A,I are collinear [08]
-D,F,I are collinear [09]
+A B C D E F : Points
+C,B,D are collinear [00]
+DB = DC [01]
+A,C,E are collinear [02]
+A,F,B are collinear [03]
+E,F,D are collinear [04]
 
  * Auxiliary Constructions:
 : Points
 
 
  * Proof steps:
-001. B,A,G are collinear [04] & B,D,C are collinear [00] & F,A,C are collinear [02] & B,F,E are collinear [03] & G,E,C are collinear [05] & D,A,E are collinear [01] ⇒  (AG:BG) * (FC:DC) * (BD:FA) = 1 [10]
-002. B,D,C are collinear [00] & AH ∥ BC [06] ⇒  BD ∥ AH [11]
-003. BD ∥ AH [11] & B,A,G are collinear [04] & D,H,G are collinear [07] ⇒  BG:AG = BD:HA [12]
-004. B,D,C are collinear [00] & H,A,I are collinear [08] & AH ∥ BC [06] ⇒  DC ∥ IA [13]
-005. DC ∥ IA [13] & D,F,I are collinear [09] & F,A,C are collinear [02] ⇒  DF:FI = FC:FA [14]
-006. DC ∥ IA [13] & D,F,I are collinear [09] & F,A,C are collinear [02] ⇒  DF:FI = DC:AI [15]
-007. (AG:BG) * (FC:DC) * (BD:FA) = 1 [10] & BG:AG = BD:HA [12] & DF:FI = FC:FA [14] & DF:FI = DC:AI [15] (Ratio chase)⇒  HA = AI
+001. A,F,B are collinear [03] & C,B,D are collinear [00] & A,C,E are collinear [02] & E,F,D are collinear [04] ⇒  (BD:DC) * (AF:FB) * (CE:EA) = 1 [05]
+002. (BD:DC) * (AF:FB) * (CE:EA) = 1 [05] & DB = DC [01] ⇒  AF:FB = EA:CE
 ==========================

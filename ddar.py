@@ -65,13 +65,14 @@ def saturate_or_goal(
       #print(p.goal.name, [ag.name for ag in goal_args])
       qicong = g.check(p.goal.name, goal_args)
       if qicong:  # found goal
-        print("yattaze")
+        #print("yattaze")
         break
       else:
-        print("yamero")
+        #print("yamero")
+        pass
 
     if not added:  # saturated
-      print("satori")
+      #print("satori")
       break
 
     if level_time > timeout:
@@ -101,7 +102,7 @@ def solve(
         g, theorems, level_times, controller, max_level/10, timeout=timeout
     )
     all_added += added
-    print(len(level_times),level_times)
+    #print(len(level_times),level_times)
     derives += dervs
     eq4s += eq4
     branches += next_branches
@@ -113,10 +114,11 @@ def solve(
       ifcong = g.check(controller.goal.name, goal_args)
       if ifcong:  # found goal
         status = 'solved'
-        print("solved")
+        #print("solved")
         break
       else:
-        print("failed")
+        pass
+        #print("failed")
 
     if not derives:  # officially saturated.
       break
