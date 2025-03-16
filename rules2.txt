@@ -7,3 +7,9 @@ AA BB / AC BD / CB DA
 
 coll A F B, coll B D C, coll C E A, onseg A F B, onseg B D C, onseg C E A, coll B P E, coll C P F, eqratio30 A F F B B D D C C E E A => coll A P D
 coll A F B, coll B D C, coll C E A, onseg A F B, onseg B C D, onseg C E A, coll D E F => eqratio30 A F F B B D D C C E E A
+
+coll A F B, coll B D C, coll C E A, coll D E F => eqratio30 A F F B B D D C C E E A
+eqangle6 B A B C Q P Q R, eqangle6 C A C B R P R Q, ncoll A B C => simtri A B C P Q R
+eqangle6 B A B C Q R Q P, eqangle6 C A C B R Q R P, ncoll A B C => simtri2 A B C P Q R
+circle O A B C, coll O A C => perp A B B C
+cong O A O B, ncoll O A B => eqangle O A A B A B O B

@@ -514,6 +514,64 @@ def why_eqratio(
 
   return deps
 
+def why_eqratio30(
+    l1: gm.Length,
+    l2: gm.Length,
+    l46: gm.Length_Pro,
+    l35: gm.Length_Pro,
+    level: int,
+) -> list[Dependency]:
+  """Why eqratio30, returns a Dependency objects."""
+  all12 = list(gm.all_ratios(l1, l2, level))
+  all4635 = list(gm.all_ratios(l46, l35, level))
+
+  min_why = None
+  for rat12, l1s, l2s in all12:
+    for rat4635, l46s, l35s in all4635:
+      why0 = gm.why_equal(rat12, rat4635, level)
+      if why0 is None:
+        continue
+      l1_, l2_ = rat12._l
+      l46_, l35_ = rat4635._l
+      why1 = gm.bfs_backtrack(l1, [l1_], l1s)
+      why2 = gm.bfs_backtrack(l2, [l2_], l2s)
+      why3 = gm.bfs_backtrack(l46, [l46_], l46s)
+      why4 = gm.bfs_backtrack(l35, [l35_], l35s)
+      why = why0 + why1 + why2 + why3 + why4
+      if min_why is None or len(why) < len(min_why[0]):
+        min_why = why, rat12, rat4635, why0, why1, why2, why3, why4
+  return min_why
+  # if min_why is None:
+  #   return None
+
+  # _, ang12, ang34, why0, why1, why2, why3, why4 = min_why
+  # d1_, d2_ = ang12._l
+  # d3_, d4_ = ang34._l
+
+  # if d1 == d1_ and d2 == d2_ and d3 == d3_ and d4 == d4_:
+  #   return why0
+
+  # (a_, b_), (c_, d_) = d1_._obj.points, d2_._obj.points
+  # (e_, f_), (g_, h_) = d3_._obj.points, d4_._obj.points
+  # deps = []
+  # if why0:
+  #   dep = Dependency('eqratio', [a_, b_, c_, d_, e_, f_, g_, h_], '', level)
+  #   dep.why = why0
+  #   deps.append(dep)
+
+  # (a, b), (c, d) = d1._obj.points, d2._obj.points
+  # (e, f), (g, h) = d3._obj.points, d4._obj.points
+  # for why, (x, y), (x_, y_) in zip(
+  #     [why1, why2, why3, why4],
+  #     [(a, b), (c, d), (e, f), (g, h)],
+  #     [(a_, b_), (c_, d_), (e_, f_), (g_, h_)],
+  # ):
+  #   if why:
+  #     dep = Dependency('cong', [x, y, x_, y_], '', level)
+  #     dep.why = why
+  #     deps.append(dep)
+
+  # return deps
 
 def why_eqangle(
     d1: gm.Direction,
@@ -668,6 +726,34 @@ def maybe_make_equal_pairs(
     why += [dep]
 
   dep = Dependency(eqname, [c, d, p, q], None, level)
+  dep.why_me(g, level)
+  why += [dep]
+  return why
+
+def maybe_make_equal_pairs30(
+    a: gm.Point,
+    b: gm.Point,
+    c: gm.Point,
+    d: gm.Point,
+    m: gm.Point,
+    n: gm.Point,
+    p: gm.Point,
+    q: gm.Point,
+    x: gm.Point,
+    y: gm.Point,
+    z: gm.Point,
+    w: gm.Point,
+    ab: gm.Line,
+    cd: gm.Line,
+    g: Any,
+    level: int,
+) -> list[Dependency]:
+  """Make a-b:c-d==m-n:p-q in case a-b==m-n or c-d==p-q."""
+  if ab != cd:
+    return
+  why = []
+  midname = 'eqratio30'
+  dep = Dependency(midname, [m, n, p, q, z, w, x, y], None, level)
   dep.why_me(g, level)
   why += [dep]
   return why
@@ -973,8 +1059,142 @@ class Dependency(Construction):
         elif ab._val and cd._val and mn._val and pq._val:
           self.why = why_eqangle(ab._val, cd._val, mn._val, pq._val, level)
 
-    elif self.name in ['diff', 'npara', 'nperp', 'ncoll', 'sameside', 'onseg', 'offseg', 'eqratio30']:
+    elif self.name in ['diff', 'npara', 'nperp', 'ncoll', 'sameside', 'onseg', 'offseg']:
       self.why = []
+    
+    elif self.name == 'eqratio30':
+      a, b, c, d, m, n, p, q, x, y, z, w = args
+      ab = g._get_segment(a, b)
+      cd = g._get_segment(c, d)
+      mn = g._get_segment(m, n)
+      pq = g._get_segment(p, q)
+      xy = g._get_segment(x, y)
+      zw = g._get_segment(z, w)      
+      #print("1")
+      if ab is None or cd is None or mn is None or pq is None or xy is None or zw is None:
+        if {a, b} == {c, d}:
+          dp = Dependency('eqratio', [m, n, p, q, z, w, x, y], None, level)
+          self.why = [dp.why_me_or_cache(g, level)]
+        if {a, b} == {p, q}:
+          dp = Dependency('eqratio', [m, n, c, d, z, w, x, y], None, level)
+          self.why = [dp.why_me_or_cache(g, level)]
+        if {a, b} == {z, w}:
+          dp = Dependency('eqratio', [m, n, p, q, c, d, x, y], None, level)
+          self.why = [dp.why_me_or_cache(g, level)]  
+        if {m, n} == {c, d}:
+          dp = Dependency('eqratio', [a, b, p, q, z, w, x, y], None, level)
+          self.why = [dp.why_me_or_cache(g, level)]
+        if {m, n} == {p, q}:
+          dp = Dependency('eqratio', [a, b, c, d, z, w, x, y], None, level)
+          self.why = [dp.why_me_or_cache(g, level)]
+        if {m, n} == {z, w}:
+          dp = Dependency('eqratio', [a, b, p, q, c, d, x, y], None, level)
+          self.why = [dp.why_me_or_cache(g, level)]  
+        if {x, y} == {c, d}:
+          dp = Dependency('eqratio', [a, b, p, q, z, w, m, n], None, level)
+          self.why = [dp.why_me_or_cache(g, level)]
+        if {x, y} == {p, q}:
+          dp = Dependency('eqratio', [a, b, c, d, z, w, m, n], None, level)
+          self.why = [dp.why_me_or_cache(g, level)]
+        if {x, y} == {z, w}:
+          dp = Dependency('eqratio', [a, b, p, q, c, d, m, n], None, level)
+          self.why = [dp.why_me_or_cache(g, level)]  
+        return
+      #print("2")
+      self.why = None
+      ab_mn, _ = g._get_or_create_length_pro(ab, mn, deps=None)
+      ab_xy, _ = g._get_or_create_length_pro(ab, xy, deps=None)
+      mn_xy, _ = g._get_or_create_length_pro(mn, xy, deps=None)
+      cd_pq, _ = g._get_or_create_length_pro(cd, pq, deps=None)
+      cd_zw, _ = g._get_or_create_length_pro(cd, zw, deps=None)
+      pq_zw, _ = g._get_or_create_length_pro(pq, zw, deps=None)
+      #print("e")
+      if self.why is None and ab._val and cd._val and mn_xy._val and pq_zw._val:
+        self.why = why_eqratio30(ab._val, cd._val, pq_zw._val, mn_xy._val, level)
+
+      elif self.why is None and ab._val and pq._val and mn_xy._val and cd_zw._val:
+        self.why = why_eqratio30(ab._val, pq._val, cd_zw._val, mn_xy._val, level)
+
+      elif self.why is None and ab._val and zw._val and mn_xy._val and cd_pq._val:
+        self.why = why_eqratio30(ab._val, zw._val, cd_pq._val, mn_xy._val, level)
+
+      elif self.why is None and mn._val and cd._val and ab_xy._val and pq_zw._val:
+        self.why = why_eqratio30(mn._val, cd._val, pq_zw._val, ab_xy._val, level)
+
+      elif self.why is None and mn._val and pq._val and ab_xy._val and cd_zw._val:
+        self.why = why_eqratio30(mn._val, pq._val, cd_zw._val, ab_xy._val, level)
+
+      elif self.why is None and mn._val and zw._val and ab_xy._val and cd_pq._val:
+        self.why = why_eqratio30(mn._val, zw._val, cd_pq._val, ab_xy._val, level)  
+
+      elif self.why is None and xy._val and cd._val and ab_mn._val and pq_zw._val:
+        self.why = why_eqratio30(xy._val, cd._val, pq_zw._val, ab_mn._val, level)
+
+      elif self.why is None and xy._val and pq._val and ab_mn._val and cd_zw._val:
+        self.why = why_eqratio30(xy._val, pq._val, cd_zw._val, ab_mn._val, level)
+
+      elif self.why is None and xy._val and zw._val and ab_mn._val and cd_pq._val:
+        self.why = why_eqratio30(xy._val, zw._val, cd_pq._val, ab_mn._val, level)    
+      #print("3")
+      if self.why is None:
+        self.why = []
+        if g.is_equal(ab, cd) or g.is_equal(mn_xy, pq_zw):
+          dep1 = Dependency('cong', [a, b, c, d], None, level)
+          dep1.why_me(g, level)
+          dep2 = Dependency('eqratio', [m, n, p, q, z, w, x, y], None, level)
+          dep2.why_me(g, level)
+          self.why += [dep1, dep2]
+        elif g.is_equal(ab, pq) or g.is_equal(mn_xy, cd_zw):
+          dep1 = Dependency('cong', [a, b, p, q], None, level)
+          dep1.why_me(g, level)
+          dep2 = Dependency('eqratio', [m, n, c, d, z, w, x, y], None, level)
+          dep2.why_me(g, level)
+          self.why += [dep1, dep2]
+        elif g.is_equal(ab, zw) or g.is_equal(mn_xy, cd_pq):
+          dep1 = Dependency('cong', [a, b, z, w], None, level)
+          dep1.why_me(g, level)
+          dep2 = Dependency('eqratio', [m, n, c, d, p, q, x, y], None, level)
+          dep2.why_me(g, level)
+          self.why += [dep1, dep2]
+        elif g.is_equal(mn, cd) or g.is_equal(ab_xy, pq_zw):
+          dep1 = Dependency('cong', [m, n, c, d], None, level)
+          dep1.why_me(g, level)
+          dep2 = Dependency('eqratio', [a, b, p, q, z, w, x, y], None, level)
+          dep2.why_me(g, level)
+          self.why += [dep1, dep2]
+        elif g.is_equal(mn, pq) or g.is_equal(ab_xy, cd_zw):
+          dep1 = Dependency('cong', [m, n, p, q], None, level)
+          dep1.why_me(g, level)
+          dep2 = Dependency('eqratio', [a, b, c, d, z, w, x, y], None, level)
+          dep2.why_me(g, level)
+          self.why += [dep1, dep2]
+        elif g.is_equal(mn, zw) or g.is_equal(ab_xy, cd_pq):
+          dep1 = Dependency('cong', [m, n, z, w], None, level)
+          dep1.why_me(g, level)
+          dep2 = Dependency('eqratio', [a, b, c, d, p, q, x, y], None, level)
+          dep2.why_me(g, level)
+          self.why += [dep1, dep2]
+        elif g.is_equal(xy, cd) or g.is_equal(ab_mn, pq_zw):
+          dep1 = Dependency('cong', [x, y, c, d], None, level)
+          dep1.why_me(g, level)
+          dep2 = Dependency('eqratio', [a, b, p, q, z, w, m, n], None, level)
+          dep2.why_me(g, level)
+          self.why += [dep1, dep2]
+        elif g.is_equal(xy, pq) or g.is_equal(ab_mn, cd_zw):
+          dep1 = Dependency('cong', [x, y, p, q], None, level)
+          dep1.why_me(g, level)
+          dep2 = Dependency('eqratio', [a, b, c, d, z, w, m, n], None, level)
+          dep2.why_me(g, level)
+          self.why += [dep1, dep2]
+        elif g.is_equal(xy, zw) or g.is_equal(ab_mn, cd_pq):
+          dep1 = Dependency('cong', [x, y, z, w], None, level)
+          dep1.why_me(g, level)
+          dep2 = Dependency('eqratio', [a, b, c, d, p, q, m, n], None, level)
+          dep2.why_me(g, level)
+          self.why += [dep1, dep2]
+        else:
+          self.why = []
+
 
     elif self.name == 'simtri':
       a, b, c, x, y, z = self.args

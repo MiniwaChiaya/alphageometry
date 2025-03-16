@@ -1706,13 +1706,14 @@ def bfs_one_level(
               p_args = b, a, b, c, y, z, y, x
         #print("a")
         dep = Dependency(p.name, p_args, rule_name='', level=level)
-        try:
-          #print("b")
-          dep = dep.why_me_or_cache(g, level)
-        except:  # pylint: disable=bare-except
-          #print("c")
-          fail = True
-          break
+        
+        dep = dep.why_me_or_cache(g, level)
+        # try:
+        #   #print("b")
+        # except:  # pylint: disable=bare-except
+        #   #print("c")
+        #   fail = True
+        #   break
 
         if dep.why is None:
           #print("d")

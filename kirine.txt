@@ -1,18 +1,21 @@
 
 ==========================
  * From theorem premises:
-A B C D E F : Points
-C,B,D are collinear [00]
-DB = DC [01]
-A,C,E are collinear [02]
-A,F,B are collinear [03]
-E,F,D are collinear [04]
+A B C D E F G : Points
+C,D,B are collinear [00]
+BD = DC [01]
+C,E,A are collinear [02]
+EA = CE [03]
+F,B,A are collinear [04]
+AF = FB [05]
+E,G,B are collinear [06]
+C,F,G are collinear [07]
 
  * Auxiliary Constructions:
 : Points
 
 
  * Proof steps:
-001. A,F,B are collinear [03] & C,B,D are collinear [00] & A,C,E are collinear [02] & E,F,D are collinear [04] ⇒  (BD:DC) * (AF:FB) * (CE:EA) = 1 [05]
-002. (BD:DC) * (AF:FB) * (CE:EA) = 1 [05] & DB = DC [01] ⇒  AF:FB = EA:CE
+001. AF = FB [05] & BD = DC [01] & EA = CE [03] ⇒  (AF:FB) * (BD:DC) * (CE:EA) = 1 [08]
+002. F,B,A are collinear [04] & C,D,B are collinear [00] & C,E,A are collinear [02] & E,G,B are collinear [06] & C,F,G are collinear [07] & (AF:FB) * (BD:DC) * (CE:EA) = 1 [08] ⇒  G,D,A are collinear
 ==========================
