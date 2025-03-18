@@ -24,14 +24,14 @@ from typing import Callable, Generator, Optional, Type, Union
 from absl import logging
 import ar
 import geometry as gm
-from geometry import Angle, Direction, Length, Ratio
+from geometry import Angle, Direction, Length, Ratio, Length_Pro, Ratio_Pro
 from geometry import Circle, Line, Point, Segment
 from geometry import Measure, Value
 import graph_utils as utils
 import numericals as nm
 import problem
 from problem import Dependency, EmptyDependency
-
+from multiset import Multiset
 
 np = nm.np
 
@@ -105,6 +105,8 @@ class Graph:
         Ratio: [],
         Measure: [],
         Value: [],
+        Length_Pro: [],
+        Ratio_Pro: [],
     }
     self._name2point = {}
     self._name2node = {}
@@ -186,6 +188,7 @@ class Graph:
         'aconst',
         'rconst',
         'cong',
+        'eqratio30'
     ]:
       return
 
@@ -212,7 +215,34 @@ class Graph:
         self.rtable.add_eq(ab, cd, dep)
       else:
         self.rtable.add_eqratio(ab, cd, mn, pq, dep)
+    
+    if name == 'eqratio30': #TODO
+      ab, cd, mn, pq, xy, zw = dep.algebra
+      _abmn_, _ = self._get_or_create_length_pro_l(ab, mn)
+      _abxy_, _ = self._get_or_create_length_pro_l(ab, xy)
+      _mnxy_, _ = self._get_or_create_length_pro_l(mn, xy)
+      _cdpq_, _ = self._get_or_create_length_pro_l(cd, pq)
+      _cdzw_, _ = self._get_or_create_length_pro_l(cd, zw)
+      _pqzw_, _ = self._get_or_create_length_pro_l(pq, zw)
+      
+      
+      self.rtable.add_length_pro(_abmn_, ab, mn)
+      self.rtable.add_length_pro(_abxy_, ab, xy)
+      self.rtable.add_length_pro(_mnxy_, mn, xy)
+      self.rtable.add_length_pro(_cdpq_, cd, pq)
+      self.rtable.add_length_pro(_cdzw_, cd, zw)
+      self.rtable.add_length_pro(_pqzw_, pq, zw)
 
+      self.rtable.add_eqratio(ab, cd, _pqzw_, _mnxy_ , dep)
+      self.rtable.add_eqratio(ab, pq, _cdzw_, _mnxy_ , dep)
+      self.rtable.add_eqratio(ab, zw, _cdpq_, _mnxy_ , dep)
+      self.rtable.add_eqratio(mn, cd, _pqzw_, _abxy_ , dep)
+      self.rtable.add_eqratio(mn, pq, _cdzw_, _abxy_ , dep)
+      self.rtable.add_eqratio(mn, zw, _cdpq_, _abxy_ , dep)
+      self.rtable.add_eqratio(xy, cd, _pqzw_, _abmn_ , dep)
+      self.rtable.add_eqratio(xy, pq, _cdzw_, _abmn_ , dep)
+      self.rtable.add_eqratio(xy, zw, _cdpq_, _abmn_ , dep)
+      
     if name == 'aconst':
       bx, ab, y = dep.algebra
       self.atable.add_const_angle(bx, ab, y, dep)
@@ -364,6 +394,16 @@ class Graph:
       if not (a != b and c != d and (a != c or b != d)):
         return []
       return self.add_cong([a, b, c, d], dep)
+    
+    if name == 'eqratio30': # TODO
+      a, b, c, d, e, f, dep = args
+      a1, a2 = a._obj.points
+      b1, b2 = b._obj.points
+      c1, c2 = c._obj.points
+      d1, d2 = d._obj.points
+      e1, e2 = e._obj.points
+      f1, f2 = f._obj.points
+      return self.add_eqratio30([a1, a2, b1, b2, c1, c2, d1, d2, e1, e2, f1, f2], dep)
 
     return []
 
@@ -385,15 +425,15 @@ class Graph:
     # Separate eqangle and eqratio derivations
     # As they are too numerous => slow down DD+AR.
     # & reserve them only for last effort.
-    eqs = {'eqangle': derives.pop('eqangle'), 'eqratio': derives.pop('eqratio')}
+    eqs = {'eqangle': derives.pop('eqangle'), 'eqratio': derives.pop('eqratio'), 'eqratio30': derives.pop('eqratio30')}
     return derives, eqs
 
   def derive_ratio_algebra(
       self, level: int, verbose: bool = False
   ) -> dict[str, list[tuple[Point, ...]]]:
     """Derive new eqratio predicates."""
-    added = {'cong2': [], 'eqratio': []}
-
+    added = {'cong2': [], 'eqratio': [], 'eqratio30': []}
+    new_products = []
     for x in self.rtable.get_all_eqs_and_why():
       x, why = x[:-1], x[-1]
       dep = EmptyDependency(level=level, rule_name='a01')
@@ -401,15 +441,90 @@ class Graph:
 
       if len(x) == 2:
         a, b = x
-        if gm.is_equiv(a, b):
-          continue
-
-        (m, n), (p, q) = a._obj.points, b._obj.points
-        added['cong2'].append((m, n, p, q, dep))
+        if type(a) is gm.Length and type(b) is gm.Length:
+          if gm.is_equiv(a, b):
+            continue
+          (m, n), (p, q) = a._obj.points, b._obj.points
+          added['cong2'].append((m, n, p, q, dep))
+        else:
+          assert type(a) is gm.Length_Pro and type(b) is gm.Length_Pro
+          a1, a2 = a._l
+          b1, b2 = b._l
+          if gm.is_equiv(a1, b1):
+            if gm.is_equiv(a2, b2):
+              continue
+            (m, n), (p, q) = a2._obj.points, b2._obj.points
+            added['cong2'].append((m, n, p, q, dep))
+          elif gm.is_equiv(a1, b2):
+            if gm.is_equiv(a2, b1):
+              continue
+            (m, n), (p, q) = a2._obj.points, b1._obj.points
+            added['cong2'].append((m, n, p, q, dep))
+          elif gm.is_equiv(a2, b1):
+            m, n = a1._obj.points
+            p, q = b2._obj.points
+            added['cong2'].append((m, n, p, q, dep))
+          elif gm.is_equiv(a2, b2):
+            m, n = a1._obj.points
+            p, q = b1._obj.points
+            added['cong2'].append((m, n, p, q, dep))
+          else:
+            if gm.is_equiv(a, b):
+              continue
+            added['eqratio'].append((a1, b1, b2, a2, dep))
 
       if len(x) == 4:
         a, b, c, d = x
-        added['eqratio'].append((a, b, c, d, dep))
+        if type(a) is gm.Length and type(d) is gm.Length:
+          assert type(b) is gm.Length, f"b.type:{type(b)}"
+          assert type(c) is gm.Length, f"c.type:{type(c)}"
+          added['eqratio'].append((a, b, c, d, dep))
+        if {type(a),type(d)} == {gm.Length, gm.Length_Pro}:
+          assert {type(b), type(c)} == {gm.Length, gm.Length_Pro}, f"b.type:{type(b)}, c.type:{type(c)}"
+          if type(a) is gm.Length: # type(d) is gm.Length_Pro
+            a, d = d, a
+          if type(b) is gm.Length: # type(c) is gm.Length_Pro
+            b, c = c, b
+          a1, a2 = a._l
+          b1, b2 = b._l
+          _a1d_, _ = self._get_or_create_length_pro_l(a1, d)
+          _a2d_, _ = self._get_or_create_length_pro_l(a2, d)
+          _b1c_, _ = self._get_or_create_length_pro_l(b1, c)
+          _b2c_, _ = self._get_or_create_length_pro_l(b2, c)
+          new_products.extend([_a1d_,_a2d_,_b1c_,_b2c_])
+          added['eqratio30'].append((a1, b1, a2, b2, d, c, dep))
+
+        if type(a) is gm.Length_Pro and type(d) is gm.Length_Pro:
+          assert type(b) is gm.Length_Pro, f"b.type:{type(b)}"
+          assert type(c) is gm.Length_Pro, f"c.type:{type(c)}"
+          a1, a2 = a._l
+          b1, b2 = b._l
+          c1, c2 = c._l
+          d1, d2 = d._l
+          
+          _a1d1_, _ = self._get_or_create_length_pro_l(a1, d1)
+          _a1d2_, _ = self._get_or_create_length_pro_l(a1, d2)
+          _a2d1_, _ = self._get_or_create_length_pro_l(a2, d1)
+          _a2d2_, _ = self._get_or_create_length_pro_l(a2, d2)
+          _b1c1_, _ = self._get_or_create_length_pro_l(b1, c1)
+          _b1c2_, _ = self._get_or_create_length_pro_l(b1, c2)
+          _b2c1_, _ = self._get_or_create_length_pro_l(b2, c1)
+          _b2c2_, _ = self._get_or_create_length_pro_l(b2, c2)
+          new_products.extend([_a1d1_,_a1d2_,_a2d1_,_a2d2_,_b1c1_,_b1c2_,_b2c1_,_b2c2_])
+          self._set_ratio_pro_equal(a, b, c, d)
+          self._set_ratio_pro_equal(a, _b1c1_,_b2c2_, d)
+          self._set_ratio_pro_equal(a, _b1c2_,_b2c1_, d)
+          self._set_ratio_pro_equal(_a1d1_, b, c, _a2d2_)
+          self._set_ratio_pro_equal(_a1d1_, _b1c1_, _b2c2_, _a2d2_)
+          self._set_ratio_pro_equal(_a1d1_, _b1c2_, _b2c1_, _a2d2_)
+          self._set_ratio_pro_equal(_a1d2_, b, c, _a2d1_)
+          self._set_ratio_pro_equal(_a1d2_, _b1c1_, _b2c2_, _a2d1_)
+          self._set_ratio_pro_equal(_a1d2_, _b1c2_, _b2c1_, _a2d1_)
+
+
+    for lp in new_products:
+      l1, l2 = lp._l
+      self.rtable.add_length_pro(lp, l1, l2)
 
     return added
 
@@ -699,6 +814,8 @@ class Graph:
       return self.add_eqangle(args, deps)
     elif name in ['eqratio', 'eqratio6']:
       return self.add_eqratio(args, deps)
+    elif name == 'eqratio30':
+      return self.add_eqratio30(args, deps)
     # numerical!
     elif name == 's_angle':
       return self.add_s_angle(args, deps)
@@ -807,6 +924,8 @@ class Graph:
       if len(args) == 5:
         return self.check_rconst(args)
       return self.check_eqratio(args)
+    if name in ['eqratio30']:
+      return self.check_eqratio30(args)
     if name in ['simtri', 'simtri2', 'simtri*']:
       return self.check_simtri(args)
     if name in ['contri', 'contri2', 'contri*']:
@@ -2087,6 +2206,95 @@ class Graph:
     r21.opposite = r12
     return r12, r21, why1 + why2
 
+  def _get_or_create_length_pro(
+      self, s1: Segment, s2: Segment, deps: Dependency
+  ) -> tuple[Length_Pro, list[Dependency]]:
+    return self._get_or_create_ratio_l(s1._val, s2._val, deps)
+
+  def _get_or_create_length_pro_l(
+      self, l1: Length, l2: Length, deps: Dependency
+  ) -> tuple[Length_Pro, list[Dependency]]:
+    """Get or create a new Length_Pro from two Lenghts l1 and l2."""
+    if l1.name > l2.name:
+      l1, l2 = l2, l1
+    for lp in self.type2nodes[Length_Pro]:
+      if lp.lengths == Multiset([l1.rep(), l2.rep()]):
+        l1_, l2_ = lp._l
+        # l1.rep() == l1_ and l2.rep() == l2_
+        why1 = l1.why_equal([l1_], None) + l1_.why_rep()
+        why2 = l2.why_equal([l2_], None) + l2_.why_rep()
+        return lp, why1 + why2
+
+    l1, why1 = l1.rep_and_why()
+    l2, why2 = l2.rep_and_why()
+    lp12 = self.new_node(Length_Pro, f'{l1.name}*{l2.name}')
+    self.connect(l1, lp12, deps)
+    self.connect(l2, lp12, deps)
+    lp12.set_lengths(l1, l2)
+    return lp12, why1 + why2
+
+  def _get_or_create_ratio_pro(
+      self, s1: Segment, s2: Segment, s3: Segment, s4: Segment, deps: Dependency
+  ) -> tuple[Ratio_Pro, Ratio_Pro, list[Dependency]]:
+    return self._get_or_create_ratio_pro_l(s1._val, s2._val, s3._val, s4._val, deps)
+
+  def _get_or_create_ratio_pro_l(
+      self, l1: Length, l2: Length, l3:Length, l4: Length, deps: Dependency
+  ) -> tuple[Ratio_Pro, Ratio_Pro, list[Dependency]]:
+    """Get or create a new Ratio_Pro from four Lengths l1*l3 and l2*l4."""
+    if l1.name > l3.name:
+      l1, l3 = l3, l1
+    if l2.name > l4.name:
+      l2, l4 = l4, l2
+    for rp in self.type2nodes[Ratio_Pro]:
+      lp13_, lp24_ = rp._lp
+      if lp13_.lengths == Multiset([l1.rep(), l3.rep()]) and lp24_.lengths == Multiset([l2.rep(), l4.rep()]):
+        l1_, l3_ = lp13_._l
+        l2_, l4_ = lp24_._l
+        # l1.rep() == l1_ and l3.rep() == l3_ and l2.rep() == l2_ and l4.rep() == l4_
+        why1 = l1.why_equal([l1_], None) + l1_.why_rep()
+        why2 = l2.why_equal([l2_], None) + l2_.why_rep()
+        why3 = l3.why_equal([l3_], None) + l3_.why_rep()
+        why4 = l4.why_equal([l4_], None) + l4_.why_rep()
+        return rp, rp.opposite, why1 + why2 + why3 + why4
+
+    l1, why1 = l1.rep_and_why()
+    l2, why2 = l2.rep_and_why()
+    l3, why3 = l3.rep_and_why()
+    l4, why4 = l4.rep_and_why()
+    lp13 = self.new_node(Length_Pro, f'{l1.name}*{l3.name}')
+    lp24 = self.new_node(Length_Pro, f'{l2.name}*{l4.name}')
+    rp1324 = self.new_node(Ratio_Pro, f'{lp13.name}/{lp24.name}')
+    rp2413 = self.new_node(Ratio_Pro, f'{lp24.name}/{lp13.name}')
+    self.connect(lp13, rp1324, deps)
+    self.connect(lp24, rp2413, deps)
+    self.connect(rp1324, rp2413, deps)
+    rp1324.set_lengths(lp13, lp24)
+    rp2413.set_lengths(lp24, lp13)
+    rp1324.opposite = rp2413
+    rp2413.opposite = rp1324
+    return rp1324, rp2413, why1 + why2 + why3 + why4
+  
+  def _get_or_create_ratio_pro_lp(
+      self, lp1: Length_Pro, lp2: Length_Pro, deps: Dependency
+  ) -> tuple[Ratio_Pro, Ratio_Pro, list[Dependency]]:
+      """Get or create a new Ratio_Pro from two Length_Pro l1*l2."""
+      l1, l3 = lp1._l
+      l2, l4 = lp2._l
+      return self._get_or_create_ratio_pro_l(l1, l2, l3, l4, deps)
+  
+  def _set_ratio_pro_equal(
+      self, lp1: Length_Pro, lp2: Length_Pro, lp3: Length_Pro, lp4: Length_Pro, deps: Dependency
+  ) -> None:
+      rp12, rp21, _ = self._get_or_create_ratio_pro_lp(lp1, lp2, deps)
+      rp34, rp43, _ = self._get_or_create_ratio_pro_lp(lp3, lp4, deps)
+      self.make_equal(rp12, rp34, deps=deps)
+      self.make_equal(rp21, rp43, deps=deps)
+      rp13, rp31, _ = self._get_or_create_ratio_pro_lp(lp1, lp3, deps)
+      rp24, rp42, _ = self._get_or_create_ratio_pro_lp(lp2, lp4, deps)
+      self.make_equal(rp13, rp24, deps=deps)
+      self.make_equal(rp31, rp42, deps=deps)
+
   def add_cong2(
       self, points: list[Point], deps: EmptyDependency
   ) -> list[Dependency]:
@@ -2158,6 +2366,9 @@ class Graph:
     ab_cd, cd_ab, why1 = self._get_or_create_ratio(ab, cd, deps=None)
     mn_pq, pq_mn, why2 = self._get_or_create_ratio(mn, pq, deps=None)
 
+    _abpq_, _ = self._get_or_create_length_pro(ab, pq, deps=None)
+    _cdmn_, _ = self._get_or_create_length_pro(cd, mn, deps=None)
+
     why = why1 + why2
     if why:
       dep0 = deps.populate('eqratio', args)
@@ -2181,6 +2392,7 @@ class Graph:
       add += [deps1]
     self.cache_dep('eqratio', [a, b, c, d, m, n, p, q], deps1)
     self.make_equal(ab_cd, mn_pq, deps=deps1)
+    self.make_equal(_abpq_, _cdmn_, deps=deps1)
 
     is_eq2 = self.is_equal(cd_ab, pq_mn)
     deps2 = None
@@ -2245,6 +2457,205 @@ class Graph:
           pq,
           deps,
       )
+    return add  
+  
+  def make_equal_pairs30(
+      self,
+      a: Point, b: Point, c: Point, d: Point, m: Point, n: Point, p: Point, q: Point, x:Point, y:Point, z:Point, w:Point,
+      ab: Segment, cd: Segment, mn: Segment, pq: Segment, xy: Segment, zw: Segment,
+      deps: EmptyDependency,
+  ) -> list[Dependency]:
+    """Add ab/cd * mn/pq * xy/zw = 1 in case ab and cd are equal."""
+
+    mn_pq, pq_mn, why1 = self._get_or_create_ratio(mn, pq, deps=None)
+    xy_zw, zw_xy, why2 = self._get_or_create_ratio(xy, zw, deps=None)
+
+    _mnzw_, _ = self._get_or_create_length_pro(mn, zw, deps=None)
+    _pqxy_, _ = self._get_or_create_length_pro(pq, xy, deps=None)
+
+    is_equal = self.is_equal(mn_pq, zw_xy)
+
+    if ab != cd:
+      dep0 = deps.populate('eqratio30', [a, b, c, d, m, n, p, q, x, y, z, w])
+      deps = EmptyDependency(level=deps.level, rule_name=None)
+
+      dep = Dependency('cong', [a, b, c, d], None, deps.level)
+      deps.why = [dep0, dep.why_me_or_cache(self, None)]
+
+    deps = deps.populate('eqratio', [m, n, p, q, z, w, x, y])
+    self.make_equal(mn_pq, zw_xy, deps=deps)
+    self.make_equal(xy_zw, pq_mn, deps=deps)
+    self.make_equal(_mnzw_, _pqxy_, deps=deps)
+
+    deps.algebra = mn._val, pq._val, zw._val, xy._val
+    self.cache_dep('eqratio', [m, n, p, q, z, w, x, y], deps)
+
+    if is_equal:
+      return []
+    return [deps]
+
+  def maybe_make_equal_pairs30(
+      self,
+      a: Point, b: Point, c: Point, d: Point, m: Point, n: Point, p: Point, q: Point, x:Point, y:Point, z:Point, w:Point,
+      ab: Segment, cd: Segment, mn: Segment, pq: Segment, xy: Segment, zw: Segment,
+      deps: EmptyDependency,
+  ) -> Optional[list[Dependency]]:
+    """Add ab/cd * mn/pq * xy/zw = 1 in case either two of (ab,cd,mn,pq,xy,zw) are equal."""
+    level = deps.level
+    if self.is_equal(ab, cd, level):
+      return self.make_equal_pairs30(a, b, c, d, m, n, p, q, x, y, z, w, ab, cd, mn, pq, xy, zw, deps)
+    elif self.is_equal(ab, pq, level):
+      return self.make_equal_pairs30(a, b, p, q, m, n, c, d, x, y, z, w, ab, pq, mn, cd, xy, zw, deps)
+    elif self.is_equal(ab, zw, level):
+      return self.make_equal_pairs30(a, b, z, w, m, n, p, q, x, y, c, d, ab, zw, mn, pq, xy, cd, deps)
+    elif self.is_equal(mn, cd, level):
+      return self.make_equal_pairs30(m, n, c, d, a, b, p, q, x, y, z, w, mn, cd, ab, pq, xy, zw, deps)
+    elif self.is_equal(mn, pq, level):
+      return self.make_equal_pairs30(m, n, p, q, a, b, c, d, x, y, z, w, mn, pq, ab, cd, xy, zw, deps)
+    elif self.is_equal(mn, zw, level):
+      return self.make_equal_pairs30(m, n, z, w, a, b, p, q, x, y, c, d, mn, zw, ab, pq, xy, cd, deps)
+    elif self.is_equal(xy, cd, level):
+      return self.make_equal_pairs30(x, y, c, d, m, n, p, q, a, b, z, w, xy, cd, mn, pq, ab, zw, deps)
+    elif self.is_equal(xy, pq, level):
+      return self.make_equal_pairs30(x, y, p, q, m, n, c, d, a, b, z, w, xy, pq, mn, cd, ab, zw, deps)
+    elif self.is_equal(xy, zw, level):
+      return self.make_equal_pairs30(x, y, z, w, m, n, p, q, a, b, c, d, xy, zw, mn, pq, ab, cd, deps)
+    else:
+      return None
+
+  def _add_eqratio30(
+      self,
+      a: Point,
+      b: Point,
+      c: Point,
+      d: Point,
+      m: Point,
+      n: Point,
+      p: Point,
+      q: Point,
+      x: Point,
+      y: Point,
+      z: Point,
+      w: Point,
+      ab: Segment,
+      cd: Segment,
+      mn: Segment,
+      pq: Segment,
+      xy: Segment,
+      zw: Segment,
+      deps: EmptyDependency,
+  ) -> list[Dependency]:
+    """Add a new eqratio from 12 points (core)."""
+    if deps:
+      deps = deps.copy()
+
+    args = [a, b, c, d, m, n, p, q, x, y, z, w]
+    i = 0
+    for u, v, uv in [(a, b, ab), (c, d, cd), (m, n, mn), (p, q, pq), (x, y, xy), (z, w, zw)]:
+      if {u, v} == set(uv.points):
+        continue
+      u_, v_ = list(uv.points)
+      if deps:
+        deps = deps.extend(self, 'eqratio', list(args), 'cong', [u, v, u_, v_])
+      args[2 * i - 2] = u_
+      args[2 * i - 1] = v_
+
+    add = []
+
+    ab_cd, cd_ab, why1 = self._get_or_create_ratio(ab, cd, deps=None)
+    mnxy_pqzw, pqzw_mnxy, why2 = self._get_or_create_ratio_pro(mn, pq, xy, zw, deps=None)
+
+    why = why1 + why2
+    if why:
+      dep0 = deps.populate('eqratio30', args)
+      deps = EmptyDependency(level=deps.level, rule_name=None)
+      deps.why = [dep0] + why
+
+    lab, lcd = ab_cd._l
+    lpmnxy, lppqzw = mnxy_pqzw._lp
+    lmn, lxy = lpmnxy._l
+    lpq, lzw = lppqzw._l
+
+    a, b = lab._obj.points
+    c, d = lcd._obj.points
+    m, n = lmn._obj.points
+    p, q = lpq._obj.points
+    x, y = lxy._obj.points
+    z, w = lzw._obj.points
+
+    is_eq1 = self.is_equal(ab_cd, mnxy_pqzw)
+    deps1 = None
+    if deps:
+      deps1 = deps.populate('eqratio30', [a, b, c, d, m, n, p, q, x, y, z, w])
+      deps1.algebra = [ab._val, cd._val, mn._val, pq._val, xy._val, zw._val]
+    if not is_eq1:
+      add += [deps1]
+    self.cache_dep('eqratio30', [a, b, c, d, m, n, p, q, x, y, z, w], deps1)
+    self.make_equal(ab_cd, mnxy_pqzw, deps=deps1)
+
+    is_eq2 = self.is_equal(cd_ab, pqzw_mnxy)
+    deps2 = None
+    if deps:
+      deps2 = deps.populate('eqratio30', [c, d, a, b, p, q, m, n, z, w, x, y])
+      deps2.algebra = [cd._val, ab._val, pq._val, mn._val, zw._val, xy._val]
+    if not is_eq2:
+      add += [deps2]
+    self.cache_dep('eqratio30', [c, d, a, b, p, q, m, n, z, w, x, y], deps2)
+    self.make_equal(cd_ab, pqzw_mnxy, deps=deps2)
+    return add
+
+  def add_eqratio30(
+      self, points: list[Point], deps: EmptyDependency
+  ) -> list[Dependency]:
+    """Add a new eqratio30 from 12 points."""
+    if deps:
+      deps = deps.copy()
+    a, b, c, d, m, n, p, q, x, y, z, w = points
+    ab = self._get_or_create_segment(a, b, deps=None)
+    cd = self._get_or_create_segment(c, d, deps=None)
+    mn = self._get_or_create_segment(m, n, deps=None)
+    pq = self._get_or_create_segment(p, q, deps=None)
+    xy = self._get_or_create_segment(x, y, deps=None)
+    zw = self._get_or_create_segment(z, w, deps=None)
+
+    add = self.maybe_make_equal_pairs30(
+        a, b, c, d, m, n, p, q, x, y, z, w, ab, cd, mn, pq, xy, zw, deps
+    )
+
+    if add is not None:
+      return add
+
+    self.connect_val(ab, deps=None)
+    self.connect_val(cd, deps=None)
+    self.connect_val(mn, deps=None)
+    self.connect_val(pq, deps=None)
+    self.connect_val(xy, deps=None)
+    self.connect_val(zw, deps=None)
+
+    _abmn_, why1 = self._get_or_create_length_pro(ab, mn, deps=None)
+    _abxy_, why2 = self._get_or_create_length_pro(ab, xy, deps=None)
+    _mnxy_, why3 = self._get_or_create_length_pro(mn, xy, deps=None)
+    _cdpq_, why4 = self._get_or_create_length_pro(cd, pq, deps=None)
+    _cdzw_, why5 = self._get_or_create_length_pro(cd, zw, deps=None)
+    _pqzw_, why6 = self._get_or_create_length_pro(pq, zw, deps=None)
+
+    self.connect_val(_abmn_, deps=why1)
+    self.connect_val(_abxy_, deps=why2)
+    self.connect_val(_mnxy_, deps=why3)
+    self.connect_val(_cdpq_, deps=why4)
+    self.connect_val(_cdzw_, deps=why5)
+    self.connect_val(_pqzw_, deps=why6)
+
+    add = []
+    add += self._add_eqratio30(a, b, c, d, m, n, p, q, x, y, z, w, ab, cd, mn, pq, xy, zw, deps)
+    add += self._add_eqratio30(a, b, p, q, m, n, c, d, x, y, z, w, ab, pq, mn, cd, xy, zw, deps)
+    add += self._add_eqratio30(a, b, z, w, m, n, p, q, x, y, c, d, ab, zw, mn, pq, xy, cd, deps)
+    add += self._add_eqratio30(m, n, c, d, a, b, p, q, x, y, z, w, mn, cd, ab, pq, xy, zw, deps)
+    add += self._add_eqratio30(m, n, p, q, a, b, c, d, x, y, z, w, mn, pq, ab, cd, xy, zw, deps)
+    add += self._add_eqratio30(m, n, z, w, a, b, c, d, x, y, p, q, mn, zw, ab, cd, xy, pq, deps)
+    add += self._add_eqratio30(x, y, c, d, a, b, p, q, m, n, z, w, xy, cd, ab, pq, mn, zw, deps)
+    add += self._add_eqratio30(x, y, p, q, a, b, c, d, m, n, z, w, xy, pq, ab, cd, mn, zw, deps)
+    add += self._add_eqratio30(x, y, z, w, a, b, c, d, m, n, p, q, xy, zw, ab, cd, mn, pq, deps)
     return add
 
   def check_rconst(self, points: list[Point], verbose: bool = False) -> bool:
@@ -2334,6 +2745,73 @@ class Graph:
     for rat1, _, _ in gm.all_ratios(ab._val, cd._val):
       for rat2, _, _ in gm.all_ratios(mn._val, pq._val):
         if self.is_equal(rat1, rat2):
+          return True
+    return False
+
+  def check_eqratio30(self, points: list[Point]) -> bool:
+    """Check if 12 points make an eqratio30 predicate."""
+    a, b, c, d, m, n, p, q, x, y, z, w = points
+
+    if {a, b} == {c, d}:
+      return self.check_eqratio([m, n, p, q, z, w, x, y])
+    if {a, b} == {p, q}:
+      return self.check_eqratio([m, n, c, d, z, w, x, y])
+    if {a, b} == {z, w}:
+      return self.check_eqratio([m, n, p, q, c, d, x, y])
+    if {m, n} == {c, d}:
+      return self.check_eqratio([a, b, p, q, z, w, x, y])
+    if {m, n} == {p, q}:
+      return self.check_eqratio([a, b, c, d, z, w, x, y])
+    if {m, n} == {z, w}:
+      return self.check_eqratio([a, b, p, q, c, d, x, y])     
+    if {x, y} == {c, d}:
+      return self.check_eqratio([a, b, p, q, z, w, m, n])
+    if {x, y} == {p, q}:
+      return self.check_eqratio([a, b, c, d, z, w, m, n])
+    if {x, y} == {z, w}:
+      return self.check_eqratio([a, b, p, q, c, d, m, n])
+
+    ab = self._get_segment(a, b)
+    cd = self._get_segment(c, d)
+    mn = self._get_segment(m, n)
+    pq = self._get_segment(p, q)
+    xy = self._get_segment(x, y)
+    zw = self._get_segment(z, w)
+
+    if not (ab and cd and mn and pq and xy and zw):
+      return False
+    
+    if self.is_equal(ab, cd):
+      return self.check_eqratio([m, n, p, q, z, w, x, y])
+    if self.is_equal(ab, pq):
+      return self.check_eqratio([m, n, c, d, z, w, x, y])
+    if self.is_equal(ab, zw):
+      return self.check_eqratio([m, n, p, q, c, d, x, y])
+    if self.is_equal(mn, cd):
+      return self.check_eqratio([a, b, p, q, z, w, x, y])
+    if self.is_equal(mn, pq):
+      return self.check_eqratio([a, b, c, d, z, w, x, y])
+    if self.is_equal(mn, zw):
+      return self.check_eqratio([a, b, p, q, c, d, x, y])     
+    if self.is_equal(xy, cd):
+      return self.check_eqratio([a, b, p, q, z, w, m, n])
+    if self.is_equal(xy, pq):
+      return self.check_eqratio([a, b, c, d, z, w, m, n])
+    if self.is_equal(xy, zw):
+      return self.check_eqratio([a, b, p, q, c, d, m, n])
+
+    if not (ab.val and cd.val and mn.val and pq.val and xy.val and zw.val):
+      return False
+
+    if Multiset([ab.val, mn.val, xy.val]) == Multiset([cd.val, pq.val, zw.val]):
+      return True
+
+    _pqzw_, _ = self._get_or_create_length_pro(pq, zw, deps=None)
+    _mnxy_, _ = self._get_or_create_length_pro(mn, xy, deps=None)
+
+    for rat1, _, _ in gm.all_ratios(ab._val, cd._val):
+      for ratp2, _, _ in gm.all_ratios2(_pqzw_._val, _mnxy_._val):
+        if self.is_equal(rat1, ratp2):
           return True
     return False
 

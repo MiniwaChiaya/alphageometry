@@ -17,6 +17,7 @@
 from __future__ import annotations
 from collections import defaultdict  # pylint: disable=g-importing-member
 from typing import Any, Type
+from multiset import Multiset
 
 # pylint: disable=protected-access
 
@@ -521,6 +522,44 @@ class Ratio(Node):
     if l1 is None or l2 is None:
       return l1, l2
     return l1.rep(), l2.rep()
+  
+
+class Length_Pro(Node):
+  """Node of type Length Product."""
+  def new_val(self) -> Value:
+    return Value()
+
+  def set_lengths(self, l1: Length, l2: Length) -> None:
+    if l1.name > l2.name:
+      l1, l2 = l2, l1
+    self._l = Multiset([l1, l2])
+
+  @property
+  def lengths(self) -> tuple[Length, Length]:
+    l1, l2 = self._l
+    if l1 is None or l2 is None:
+      return l1, l2
+    l1r = l1.rep()
+    l2r = l2.rep()
+    if l1r.name > l2r.name:
+      l1r, l2r = l2r, l1r
+    return Multiset([l1r, l2r])
+
+class Ratio_Pro(Node):
+  """Node of type Ratio Product. l1/l2 * l3/l4 = (l1*l3) / (l2*l4)"""
+
+  def new_val(self) -> Value:
+    return Value()
+
+  def set_products(self, lp13: Length_Pro, lp24: Length_Pro) -> None:
+    self._lp = lp13, lp24
+
+  @property
+  def muls(self) -> tuple[Length_Pro, Length_Pro]:
+    lp13, lp24 = self._ml
+    if lp13 is None or lp24 is None:
+      return lp13, lp24
+    return lp13.rep(), lp24.rep()
 
 
 class Value(Node):
@@ -541,16 +580,29 @@ def all_angles(
 
 
 def all_ratios(
-    d1, d2, level=None
-) -> tuple[Angle, list[Direction], list[Direction]]:
+    l1, l2, level=None
+) -> tuple[Ratio, list[Length], list[Length]]:
   level = level or float('inf')
-  d1s = d1.equivs_upto(level)
-  d2s = d2.equivs_upto(level)
+  l1s = l1.equivs_upto(level)
+  l2s = l2.equivs_upto(level)
 
-  for ang in d1.rep().neighbors(Ratio):
-    d1_, d2_ = ang._l
-    if d1_ in d1s and d2_ in d2s:
-      yield ang, d1s, d2s
+  for rat in l1.rep().neighbors(Ratio):
+    l1_, l2_ = rat._l
+    if l1_ in l1s and l2_ in l2s:
+      yield rat, l1s, l2s
+      
+def all_ratios2(
+    lp1: Length_Pro, lp2: Length_Pro, level=None
+) -> tuple[Ratio_Pro, list[Length_Pro], list[Length_Pro]]:
+  level = level or float('inf')
+  lp1s = lp1.equivs_upto(level)
+  lp2s = lp2.equivs_upto(level)
+
+  for ratp in lp1.rep().neighbors(Ratio_Pro):
+    lp1_, lp2_ = ratp._l
+    if lp1_ in lp1s and lp2_ in lp2s:
+      yield ratp, lp1s, lp2s
+
 
 
 RANKING = {
@@ -575,4 +627,8 @@ def val_type(x: Node) -> Type[Node]:
   if isinstance(x, Angle):
     return Measure
   if isinstance(x, Ratio):
+    return Value
+  if isinstance(x, Length_Pro):
+    return Value
+  if isinstance(x, Ratio_Pro):
     return Value

@@ -17,7 +17,7 @@
 
 from collections import defaultdict  # pylint: disable=g-importing-member
 from fractions import Fraction as frac  # pylint: disable=g-importing-member
-from typing import Any, Generator
+from typing import Any, Generator, Union
 
 import geometry as gm
 import numpy as np
@@ -363,7 +363,7 @@ class Table:
   def register2(
       self, a: str, b: str, m: float, n: float, dep: pr.Dependency
   ) -> None:
-    self.register([(a, m), (b, -n)], dep)
+    self.register([(a, n), (b, -m)], dep)
 
   def register3(self, a: str, b: str, f: float, dep: pr.Dependency) -> None:
     self.register([(a, 1), (b, -1), (self.const, -f)], dep)
@@ -372,6 +372,11 @@ class Table:
       self, a: str, b: str, c: str, d: str, dep: pr.Dependency
   ) -> None:
     self.register([(a, 1), (b, -1), (c, -1), (d, 1)], dep)
+
+  def register5(
+      self, a: str, b: str, c: str, dep: pr.Dependency
+  ) -> None:
+    self.register([(a, 1), (b, -1), (c, -1)], dep)
 
   def why(self, e: dict[str, float]) -> list[Any]:
     """AR traceback == MILP."""
@@ -401,7 +406,7 @@ class Table:
     deps = []
     for i, dep in enumerate(self.deps):
       if x[2 * i] > 1e-12 or x[2 * i + 1] > 1e-12:
-        if dep not in deps:
+        if dep is not None and dep not in deps:
           deps.append(dep)
     return deps
 
@@ -426,7 +431,7 @@ class Table:
       self, a: str, b: str, m: float, n: float, dep: pr.Dependency
   ) -> None:
     # a/b = m/n
-    if not self.add_expr([(a, m), (b, -n)]):
+    if not self.add_expr([(a, n), (b, -m)]):
       return []
     self.register2(a, b, m, n, dep)
 
@@ -454,6 +459,19 @@ class Table:
     self.groups, _, _ = update_groups(
         self.groups, [{(a, b), (c, d)}, {(b, a), (d, c)}]
     )
+
+
+  def add_eq5(self, a: str, b: str, c: str, dep: pr.Dependency) -> None:
+    # a = b + c
+    self.eqs.add((a, b, c))
+    self.eqs.add((a, c, b))
+
+    expr = list(minus({a: 1, b: -1}, {c: 1}).items())
+
+    if not self.add_expr(expr):
+      return []
+
+    self.register5(a, b, c, dep)
 
   def pairs(self) -> Generator[list[tuple[str, str]], None, None]:
     for v1, v2 in perm2(list(self.v2e.keys())):  # pylint: disable=g-builtin-op
@@ -575,17 +593,28 @@ class RatioTable(GeometricTable):
 
   def add_eqratio(
       self,
-      l1: gm.Length,
-      l2: gm.Length,
-      l3: gm.Length,
-      l4: gm.Length,
+      l1: Union[gm.Length, gm.Length_Pro],
+      l2: Union[gm.Length, gm.Length_Pro],
+      l3: Union[gm.Length, gm.Length_Pro],
+      l4: Union[gm.Length, gm.Length_Pro],
       dep: pr.Dependency,
   ) -> None:
     l1, l2, l3, l4 = self.get_name([l1, l2, l3, l4])
-    return self.add_eq4(l1, l2, l3, l4, dep)
+    return super().add_eq4(l1, l2, l3, l4, dep)
+
+  def add_length_pro(
+      self,
+      lp: gm.Length_Pro,
+      l1: gm.Length,
+      l2: gm.Length,
+      dep=None,
+  ) -> None:
+    lp, l1, l2 = self.get_name([lp, l1, l2])
+    return super().add_eq5(lp, l1, l2, dep)
 
   def get_all_eqs_and_why(self) -> Generator[Any, None, None]:
     return super().get_all_eqs_and_why(True)
+
 
 
 class AngleTable(GeometricTable):
