@@ -1,7 +1,13 @@
-a = {3,4,5,6,7}
+a = (2>0)
 
-b = {z for z in a if z %2 == 0}
+b = True
 
-x,y = b
+c = (3<0)
 
-print(x,y)
+print(a+b)
+
+print(a+c)
+
+print(2*a+b)
+
+print(a)

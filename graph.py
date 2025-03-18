@@ -1002,6 +1002,12 @@ class Graph:
   def check_sameside(self, points: list[Point]) -> bool:
     return nm.check_sameside([p.num for p in points])
 
+  def check_onseg(self, points: list[Point]) -> bool:
+    return nm.check_onseg([p.num for p in points])
+
+  def check_offseg(self, points: list[Point]) -> bool:
+    return nm.check_offseg([p.num for p in points])
+
   def make_equal(self, x: gm.Node, y: gm.Node, deps: Dependency) -> None:
     """Make that two nodes x and y are equal, i.e. merge their value node."""
     if x.val is None:

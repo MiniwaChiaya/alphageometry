@@ -678,6 +678,20 @@ def check_sameside(points: list[Point]) -> bool:
   yz = y - z
   return ba.dot(bc) * yx.dot(yz) > 0
 
+def check_onseg(points: list[Point]) -> bool:
+  b, a, c = points
+  # whether b(on line ac) is on segment ac 
+  ba = b - a
+  bc = b - c
+  return ba.dot(bc) < 0
+
+def check_offseg(points: list[Point]) -> bool:
+  b, a, c = points
+  # whether b(on line ac) is not on segment ac 
+  ba = b - a
+  bc = b - c
+  return ba.dot(bc) > 0
+
 
 def check_para_or_coll(points: list[Point]) -> bool:
   return check_para(points) or check_coll(points)
