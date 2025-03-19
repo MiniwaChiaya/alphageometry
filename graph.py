@@ -391,8 +391,10 @@ class Graph:
 
     if name in ['cong', 'cong2']:
       a, b, c, d, dep = args
+      print('before', a.name, b.name, c.name, d.name)
       if not (a != b and c != d and (a != c or b != d)):
         return []
+      print('after', a.name, b.name, c.name, d.name)
       return self.add_cong([a, b, c, d], dep)
     
     if name == 'eqratio30': # TODO
@@ -442,9 +444,11 @@ class Graph:
       if len(x) == 2:
         a, b = x
         if type(a) is gm.Length and type(b) is gm.Length:
+          print("myab",a.name,b.name)
           if gm.is_equiv(a, b):
             continue
           (m, n), (p, q) = a._obj.points, b._obj.points
+          print(m.name,n.name,p.name,q.name)
           added['cong2'].append((m, n, p, q, dep))
         else:
           assert type(a) is gm.Length_Pro and type(b) is gm.Length_Pro
@@ -497,6 +501,7 @@ class Graph:
         if type(a) is gm.Length_Pro and type(d) is gm.Length_Pro:
           assert type(b) is gm.Length_Pro, f"b.type:{type(b)}"
           assert type(c) is gm.Length_Pro, f"c.type:{type(c)}"
+          continue
           a1, a2 = a._l
           b1, b2 = b._l
           c1, c2 = c._l
@@ -785,6 +790,10 @@ class Graph:
       name = 'l(' + node.name + ')'
     if isinstance(node, Ratio):
       name = 'r(' + node.name + ')'
+    if isinstance(node, Ratio_Pro):
+      name = 'rp(' + node.name + ')'
+    if isinstance(node, Length_Pro):
+      name = 'lp(' + node.name + ')'
     v = self.new_node(gm.val_type(node), name)
     self.connect(node, v, deps=deps)
     return v
@@ -1131,7 +1140,6 @@ class Graph:
     """Make that two nodes x and y are equal, i.e. merge their value node."""
     if x.val is None:
       x, y = y, x
-
     self.connect_val(x, deps=None)
     self.connect_val(y, deps=None)
     vx = x._val
@@ -2207,12 +2215,12 @@ class Graph:
     return r12, r21, why1 + why2
 
   def _get_or_create_length_pro(
-      self, s1: Segment, s2: Segment, deps: Dependency
+      self, s1: Segment, s2: Segment, deps=None
   ) -> tuple[Length_Pro, list[Dependency]]:
-    return self._get_or_create_ratio_l(s1._val, s2._val, deps)
+    return self._get_or_create_length_pro_l(s1._val, s2._val, deps)
 
   def _get_or_create_length_pro_l(
-      self, l1: Length, l2: Length, deps: Dependency
+      self, l1: Length, l2: Length, deps=None
   ) -> tuple[Length_Pro, list[Dependency]]:
     """Get or create a new Length_Pro from two Lenghts l1 and l2."""
     if l1.name > l2.name:
@@ -2220,10 +2228,13 @@ class Graph:
     for lp in self.type2nodes[Length_Pro]:
       if lp.lengths == Multiset([l1.rep(), l2.rep()]):
         l1_, l2_ = lp._l
-        # l1.rep() == l1_ and l2.rep() == l2_
-        why1 = l1.why_equal([l1_], None) + l1_.why_rep()
-        why2 = l2.why_equal([l2_], None) + l2_.why_rep()
-        return lp, why1 + why2
+        if l1.rep() == l1_:# l1.rep() == l1_ and l2.rep() == l2_
+          why1 = l1.why_equal([l1_], None) + l1_.why_rep()
+          why2 = l2.why_equal([l2_], None) + l2_.why_rep()
+          return lp, why1 + why2
+        else: #l2.rep() == l1_ and l1.rep == l2_
+          why1 = l2.why_equal([l1_], None) + l1_.why_rep()
+          why2 = l1.why_equal([l2_], None) + l2_.why_rep()
 
     l1, why1 = l1.rep_and_why()
     l2, why2 = l2.rep_and_why()
@@ -2234,12 +2245,12 @@ class Graph:
     return lp12, why1 + why2
 
   def _get_or_create_ratio_pro(
-      self, s1: Segment, s2: Segment, s3: Segment, s4: Segment, deps: Dependency
+      self, s1: Segment, s2: Segment, s3: Segment, s4: Segment, deps=None
   ) -> tuple[Ratio_Pro, Ratio_Pro, list[Dependency]]:
     return self._get_or_create_ratio_pro_l(s1._val, s2._val, s3._val, s4._val, deps)
 
   def _get_or_create_ratio_pro_l(
-      self, l1: Length, l2: Length, l3:Length, l4: Length, deps: Dependency
+      self, l1: Length, l2: Length, l3:Length, l4: Length, deps=None
   ) -> tuple[Ratio_Pro, Ratio_Pro, list[Dependency]]:
     """Get or create a new Ratio_Pro from four Lengths l1*l3 and l2*l4."""
     if l1.name > l3.name:
@@ -2264,6 +2275,8 @@ class Graph:
     l4, why4 = l4.rep_and_why()
     lp13 = self.new_node(Length_Pro, f'{l1.name}*{l3.name}')
     lp24 = self.new_node(Length_Pro, f'{l2.name}*{l4.name}')
+    lp13.set_lengths(l1, l3)
+    lp24.set_lengths(l2, l4)
     rp1324 = self.new_node(Ratio_Pro, f'{lp13.name}/{lp24.name}')
     rp2413 = self.new_node(Ratio_Pro, f'{lp24.name}/{lp13.name}')
     self.connect(lp13, rp1324, deps)
@@ -2276,7 +2289,7 @@ class Graph:
     return rp1324, rp2413, why1 + why2 + why3 + why4
   
   def _get_or_create_ratio_pro_lp(
-      self, lp1: Length_Pro, lp2: Length_Pro, deps: Dependency
+      self, lp1: Length_Pro, lp2: Length_Pro, deps=None
   ) -> tuple[Ratio_Pro, Ratio_Pro, list[Dependency]]:
       """Get or create a new Ratio_Pro from two Length_Pro l1*l2."""
       l1, l3 = lp1._l
@@ -2284,7 +2297,7 @@ class Graph:
       return self._get_or_create_ratio_pro_l(l1, l2, l3, l4, deps)
   
   def _set_ratio_pro_equal(
-      self, lp1: Length_Pro, lp2: Length_Pro, lp3: Length_Pro, lp4: Length_Pro, deps: Dependency
+      self, lp1: Length_Pro, lp2: Length_Pro, lp3: Length_Pro, lp4: Length_Pro, deps=None
   ) -> None:
       rp12, rp21, _ = self._get_or_create_ratio_pro_lp(lp1, lp2, deps)
       rp34, rp43, _ = self._get_or_create_ratio_pro_lp(lp3, lp4, deps)
@@ -2618,6 +2631,14 @@ class Graph:
     xy = self._get_or_create_segment(x, y, deps=None)
     zw = self._get_or_create_segment(z, w, deps=None)
 
+    
+    self.connect_val(ab, deps=None)
+    self.connect_val(cd, deps=None)
+    self.connect_val(mn, deps=None)
+    self.connect_val(pq, deps=None)
+    self.connect_val(xy, deps=None)
+    self.connect_val(zw, deps=None)
+
     add = self.maybe_make_equal_pairs30(
         a, b, c, d, m, n, p, q, x, y, z, w, ab, cd, mn, pq, xy, zw, deps
     )
@@ -2625,12 +2646,7 @@ class Graph:
     if add is not None:
       return add
 
-    self.connect_val(ab, deps=None)
-    self.connect_val(cd, deps=None)
-    self.connect_val(mn, deps=None)
-    self.connect_val(pq, deps=None)
-    self.connect_val(xy, deps=None)
-    self.connect_val(zw, deps=None)
+    add = []
 
     _abmn_, why1 = self._get_or_create_length_pro(ab, mn, deps=None)
     _abxy_, why2 = self._get_or_create_length_pro(ab, xy, deps=None)

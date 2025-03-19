@@ -1,24 +1,22 @@
 
 ==========================
  * From theorem premises:
-A B C D E F G H I J : Points
-DA = DB [00]
+A B C D E F G : Points
+C,B,D are collinear [00]
 DB = DC [01]
-DE = DA [02]
-DF = DA [03]
-DG = DA [04]
-E,F,H are collinear [05]
-H,A,B are collinear [06]
-F,I,G are collinear [07]
-C,I,B are collinear [08]
-J,A,G are collinear [09]
-E,C,J are collinear [10]
+EC = EA [02]
+C,E,A are collinear [03]
+F,B,E are collinear [04]
+F,D,A are collinear [05]
+B,G,A are collinear [06]
+C,F,G are collinear [07]
 
  * Auxiliary Constructions:
 : Points
 
 
  * Proof steps:
-001. DF = DA [03] & DG = DA [04] & DA = DB [00] & DE = DA [02] & DB = DC [01] ⇒  E,B,F,C,A,G are concyclic [11]
-002. E,B,F,C,A,G are concyclic [11] & E,F,H are collinear [05] & H,A,B are collinear [06] & F,I,G are collinear [07] & C,I,B are collinear [08] & J,A,G are collinear [09] & E,C,J are collinear [10] ⇒  I,J,H are collinear
+001. B,G,A are collinear [06] & C,B,D are collinear [00] & C,E,A are collinear [03] & F,B,E are collinear [04] & C,F,G are collinear [07] & F,D,A are collinear [05] ⇒  (BD:DC) * (AG:GB) * (CE:EA) = 1 [08]
+002. (BD:DC) * (AG:GB) * (CE:EA) = 1 [08] & DB = DC [01] ⇒  AG:GB = EA:CE [09]
+003. EC = EA [02] & AG:GB = EA:CE [09] (Ratio chase)⇒  BG = GA
 ==========================

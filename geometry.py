@@ -132,14 +132,18 @@ class Node:
 
   def is_val(self, node: Node) -> bool:
     return (
-        isinstance(self, Line)
-        and isinstance(node, Direction)
-        or isinstance(self, Segment)
-        and isinstance(node, Length)
-        or isinstance(self, Angle)
-        and isinstance(node, Measure)
-        or isinstance(self, Ratio)
-        and isinstance(node, Value)
+        (isinstance(self, Line)
+        and isinstance(node, Direction))
+        or (isinstance(self, Segment)
+        and isinstance(node, Length))
+        or (isinstance(self, Angle)
+        and isinstance(node, Measure))
+        or (isinstance(self, Ratio)
+        and isinstance(node, Value))
+        or (isinstance(self, Ratio_Pro)
+        and isinstance(node, Value))
+        or (isinstance(self, Length_Pro)
+        and isinstance(node, Value))
     )
 
   def set_val(self, node: Node) -> None:
@@ -170,7 +174,7 @@ class Node:
       rep.edge_graph[node].update({self: deps})
     else:
       rep.edge_graph[node] = {self: deps}
-
+  
     if self.is_val(node):
       self.set_val(node)
       node.set_obj(self)
@@ -551,7 +555,7 @@ class Ratio_Pro(Node):
   def new_val(self) -> Value:
     return Value()
 
-  def set_products(self, lp13: Length_Pro, lp24: Length_Pro) -> None:
+  def set_lengths(self, lp13: Length_Pro, lp24: Length_Pro) -> None:
     self._lp = lp13, lp24
 
   @property

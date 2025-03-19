@@ -977,10 +977,10 @@ def match_ceva(
         bes = be.neighbors(gm.Point, return_set=True)
         p = intersect1(ads, bes)
         if g.check_coll([p, c, f]):
-          #debugname([p, a, b, c, d, e, f])
+          debugname([p, a, b, c, d, e, f])
           yield dict(zip('PABCDEF', [p, a, b, c, d, e, f]))
   tb = time.time()
-  #print(tb-ta)
+  print(tb-ta)
 
 def match_menelaus_rev(
     g: gh.Graph,
