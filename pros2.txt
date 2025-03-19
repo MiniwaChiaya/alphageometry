@@ -45,4 +45,6 @@ a b c = triangle a b c; d = foot d a b c; h = on_line h a d; e = on_line e a c, 
 test_menelaus
 a b c = triangle a b c; d = midpoint d b c; e = on_line e c a; f = on_line f a b, on_line f d e ? eqratio c e e a b f f a
 exercise20_2
-a b = segment; o = midpoint o a b; c = on_bline c a b, on_circle c o a; m = midpoint b c; d = foot d c a m; e = on_line e c d, on_line e a b; n = midpoint n a e ? cong a n b e
+a b = segment a b; c = on_tline c b a b, on_circle c b a; d = midpoint d b c; e = foot e b a d; f = on_line f b e, on_line f a c; g = midpoint g a f ? cong a g c f
+example1_11
+a b c = triangle a b c; d = on_line d a b; e = on_line e a c; f = midpoint f d e; g = on_line g d e; h = mirror h f g; i = on_line i a b; j = on_line j g i, on_line j a c; k = on_line k a b; l = on_line l k h, on_line l a c; m = on_line m j k, on_line m d e; n = on_line n i l, on_line n d e ? cong f m f n

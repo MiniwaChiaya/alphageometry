@@ -391,10 +391,8 @@ class Graph:
 
     if name in ['cong', 'cong2']:
       a, b, c, d, dep = args
-      print('before', a.name, b.name, c.name, d.name)
       if not (a != b and c != d and (a != c or b != d)):
         return []
-      print('after', a.name, b.name, c.name, d.name)
       return self.add_cong([a, b, c, d], dep)
     
     if name == 'eqratio30': # TODO
@@ -435,54 +433,33 @@ class Graph:
   ) -> dict[str, list[tuple[Point, ...]]]:
     """Derive new eqratio predicates."""
     added = {'cong2': [], 'eqratio': [], 'eqratio30': []}
-    new_products = []
+    new_products = set()
     for x in self.rtable.get_all_eqs_and_why():
       x, why = x[:-1], x[-1]
       dep = EmptyDependency(level=level, rule_name='a01')
       dep.why = why
+      A = []
+      B = []
 
       if len(x) == 2:
         a, b = x
         if type(a) is gm.Length and type(b) is gm.Length:
-          print("myab",a.name,b.name)
-          if gm.is_equiv(a, b):
-            continue
-          (m, n), (p, q) = a._obj.points, b._obj.points
-          print(m.name,n.name,p.name,q.name)
-          added['cong2'].append((m, n, p, q, dep))
+          A = [a]
+          B = [b]
         else:
           assert type(a) is gm.Length_Pro and type(b) is gm.Length_Pro
           a1, a2 = a._l
           b1, b2 = b._l
-          if gm.is_equiv(a1, b1):
-            if gm.is_equiv(a2, b2):
-              continue
-            (m, n), (p, q) = a2._obj.points, b2._obj.points
-            added['cong2'].append((m, n, p, q, dep))
-          elif gm.is_equiv(a1, b2):
-            if gm.is_equiv(a2, b1):
-              continue
-            (m, n), (p, q) = a2._obj.points, b1._obj.points
-            added['cong2'].append((m, n, p, q, dep))
-          elif gm.is_equiv(a2, b1):
-            m, n = a1._obj.points
-            p, q = b2._obj.points
-            added['cong2'].append((m, n, p, q, dep))
-          elif gm.is_equiv(a2, b2):
-            m, n = a1._obj.points
-            p, q = b1._obj.points
-            added['cong2'].append((m, n, p, q, dep))
-          else:
-            if gm.is_equiv(a, b):
-              continue
-            added['eqratio'].append((a1, b1, b2, a2, dep))
+          A = [a1, a2]
+          B = [b1, b2]
 
       if len(x) == 4:
         a, b, c, d = x
         if type(a) is gm.Length and type(d) is gm.Length:
           assert type(b) is gm.Length, f"b.type:{type(b)}"
           assert type(c) is gm.Length, f"c.type:{type(c)}"
-          added['eqratio'].append((a, b, c, d, dep))
+          A = [a,d]
+          B = [b,c]
         if {type(a),type(d)} == {gm.Length, gm.Length_Pro}:
           assert {type(b), type(c)} == {gm.Length, gm.Length_Pro}, f"b.type:{type(b)}, c.type:{type(c)}"
           if type(a) is gm.Length: # type(d) is gm.Length_Pro
@@ -491,41 +468,80 @@ class Graph:
             b, c = c, b
           a1, a2 = a._l
           b1, b2 = b._l
-          _a1d_, _ = self._get_or_create_length_pro_l(a1, d)
-          _a2d_, _ = self._get_or_create_length_pro_l(a2, d)
-          _b1c_, _ = self._get_or_create_length_pro_l(b1, c)
-          _b2c_, _ = self._get_or_create_length_pro_l(b2, c)
-          new_products.extend([_a1d_,_a2d_,_b1c_,_b2c_])
-          added['eqratio30'].append((a1, b1, a2, b2, d, c, dep))
+          A = [a1, a2, d]
+          B = [b1, b2, c]
 
         if type(a) is gm.Length_Pro and type(d) is gm.Length_Pro:
           assert type(b) is gm.Length_Pro, f"b.type:{type(b)}"
           assert type(c) is gm.Length_Pro, f"c.type:{type(c)}"
-          continue
           a1, a2 = a._l
           b1, b2 = b._l
           c1, c2 = c._l
           d1, d2 = d._l
-          
-          _a1d1_, _ = self._get_or_create_length_pro_l(a1, d1)
-          _a1d2_, _ = self._get_or_create_length_pro_l(a1, d2)
-          _a2d1_, _ = self._get_or_create_length_pro_l(a2, d1)
-          _a2d2_, _ = self._get_or_create_length_pro_l(a2, d2)
-          _b1c1_, _ = self._get_or_create_length_pro_l(b1, c1)
-          _b1c2_, _ = self._get_or_create_length_pro_l(b1, c2)
-          _b2c1_, _ = self._get_or_create_length_pro_l(b2, c1)
-          _b2c2_, _ = self._get_or_create_length_pro_l(b2, c2)
-          new_products.extend([_a1d1_,_a1d2_,_a2d1_,_a2d2_,_b1c1_,_b1c2_,_b2c1_,_b2c2_])
-          self._set_ratio_pro_equal(a, b, c, d)
-          self._set_ratio_pro_equal(a, _b1c1_,_b2c2_, d)
-          self._set_ratio_pro_equal(a, _b1c2_,_b2c1_, d)
-          self._set_ratio_pro_equal(_a1d1_, b, c, _a2d2_)
-          self._set_ratio_pro_equal(_a1d1_, _b1c1_, _b2c2_, _a2d2_)
-          self._set_ratio_pro_equal(_a1d1_, _b1c2_, _b2c1_, _a2d2_)
-          self._set_ratio_pro_equal(_a1d2_, b, c, _a2d1_)
-          self._set_ratio_pro_equal(_a1d2_, _b1c1_, _b2c2_, _a2d1_)
-          self._set_ratio_pro_equal(_a1d2_, _b1c2_, _b2c1_, _a2d1_)
+          A = [a1, a2, d1, d2]
+          B = [b1, b2, c1, c2]
 
+      print('before',[ag.name for ag in A],[ag.name for ag in B])
+      A_ = []
+      for x in A:
+        for y in B:
+          if gm.is_equiv(x, y):
+            B.remove(y)
+            A_.append(x)
+            break
+      for x in A_:
+        A.remove(x)
+
+      print('after',[ag.name for ag in A],[ag.name for ag in B])
+      if len(A) == 0:
+        continue
+      elif len(A) == 1:
+        a = A[0]
+        b = B[0]
+        m, n = a._obj.points
+        p, q = b._obj.points
+        added['cong2'].append((m, n, p, q, dep))
+      elif len(A) == 2:
+        a, d = A
+        b, c = B
+        added['eqratio'].append((a, b, c, d, dep))
+      elif len(A) == 3:
+        a1, a2, d = A
+        b1, b2, c = B
+        _a1a2_, _ = self._get_or_create_length_pro_l(a1, a2)
+        _a1d_, _ = self._get_or_create_length_pro_l(a1, d)
+        _a2d_, _ = self._get_or_create_length_pro_l(a2, d)
+        _b1b2_, _ = self._get_or_create_length_pro_l(b1, b2)
+        _b1c_, _ = self._get_or_create_length_pro_l(b1, c)
+        _b2c_, _ = self._get_or_create_length_pro_l(b2, c)
+        new_products.update([_a1a2_,_a1d_,_a2d_,_b1b2_,_b1c_,_b2c_])
+        added['eqratio30'].append((a1, b1, a2, b2, d, c, dep))
+      else : #len(A) == 4
+        a1, a2, d1, d2 = A
+        b1, b2, c1, c2 = B
+        _a1a2_, _ = self._get_or_create_length_pro_l(a1, a2)
+        _a1d1_, _ = self._get_or_create_length_pro_l(a1, d1)
+        _a1d2_, _ = self._get_or_create_length_pro_l(a1, d2)
+        _a2d1_, _ = self._get_or_create_length_pro_l(a2, d1)
+        _a2d2_, _ = self._get_or_create_length_pro_l(a2, d2)
+        _d1d2_, _ = self._get_or_create_length_pro_l(d1, d2)
+        _b1b2_, _ = self._get_or_create_length_pro_l(b1, b2)
+        _b1c1_, _ = self._get_or_create_length_pro_l(b1, c1)
+        _b1c2_, _ = self._get_or_create_length_pro_l(b1, c2)
+        _b2c1_, _ = self._get_or_create_length_pro_l(b2, c1)
+        _b2c2_, _ = self._get_or_create_length_pro_l(b2, c2)
+        _c1c2_, _ = self._get_or_create_length_pro_l(c1, c2)
+        new_products.update([_a1a2_,_a1d1_,_a1d2_,_a2d1_,_a2d2_,_d1d2_,_b1b2_,_b1c1_,_b1c2_,_b2c1_,_b2c2_,_d1d2_])
+      
+        self._set_ratio_pro_equal(_a1a2_, _b1b2_, _c1c2_, _d1d2_, dep)
+        self._set_ratio_pro_equal(_a1a2_, _b1c1_, _b2c2_, _d1d2_, dep)
+        self._set_ratio_pro_equal(_a1a2_, _b1c2_, _b2c1_, _d1d2_, dep)
+        self._set_ratio_pro_equal(_a1d1_, _b1b2_, _c1c2_, _a2d2_, dep)
+        self._set_ratio_pro_equal(_a1d1_, _b1c1_, _b2c2_, _a2d2_, dep)
+        self._set_ratio_pro_equal(_a1d1_, _b1c2_, _b2c1_, _a2d2_, dep)
+        self._set_ratio_pro_equal(_a1d2_, _b1b2_, _c1c2_, _a2d1_, dep)
+        self._set_ratio_pro_equal(_a1d2_, _b1c1_, _b2c2_, _a2d1_, dep)
+        self._set_ratio_pro_equal(_a1d2_, _b1c2_, _b2c1_, _a2d1_, dep)
 
     for lp in new_products:
       l1, l2 = lp._l
@@ -641,6 +657,7 @@ class Graph:
 
       args = list(map(lambda x: g.get(x, lambda: int(x)), pr.goal.args))
       check = nm.check(pr.goal.name, args)
+      print(check)
 
     g.url = pr.url
     g.build_def = (pr, definitions)
@@ -2227,7 +2244,7 @@ class Graph:
       l1, l2 = l2, l1
     for lp in self.type2nodes[Length_Pro]:
       if lp.lengths == Multiset([l1.rep(), l2.rep()]):
-        l1_, l2_ = lp._l
+        l1_, l2_ = lp.lengths
         if l1.rep() == l1_:# l1.rep() == l1_ and l2.rep() == l2_
           why1 = l1.why_equal([l1_], None) + l1_.why_rep()
           why2 = l2.why_equal([l2_], None) + l2_.why_rep()
@@ -2260,13 +2277,20 @@ class Graph:
     for rp in self.type2nodes[Ratio_Pro]:
       lp13_, lp24_ = rp._lp
       if lp13_.lengths == Multiset([l1.rep(), l3.rep()]) and lp24_.lengths == Multiset([l2.rep(), l4.rep()]):
-        l1_, l3_ = lp13_._l
-        l2_, l4_ = lp24_._l
-        # l1.rep() == l1_ and l3.rep() == l3_ and l2.rep() == l2_ and l4.rep() == l4_
-        why1 = l1.why_equal([l1_], None) + l1_.why_rep()
-        why2 = l2.why_equal([l2_], None) + l2_.why_rep()
-        why3 = l3.why_equal([l3_], None) + l3_.why_rep()
-        why4 = l4.why_equal([l4_], None) + l4_.why_rep()
+        l1_, l3_ = lp13_.lengths
+        l2_, l4_ = lp24_.lengths
+        if l1.rep() == l1_:
+          why1 = l1.why_equal([l1_], None) + l1_.why_rep()
+          why3 = l3.why_equal([l3_], None) + l3_.why_rep()
+        else:
+          why1 = l3.why_equal([l1_], None) + l1_.why_rep()
+          why3 = l1.why_equal([l3_], None) + l3_.why_rep()
+        if l2.rep() == l2_:
+          why2 = l2.why_equal([l2_], None) + l2_.why_rep()
+          why4 = l4.why_equal([l4_], None) + l4_.why_rep()
+        else:
+          why2 = l4.why_equal([l2_], None) + l2_.why_rep()
+          why4 = l2.why_equal([l4_], None) + l4_.why_rep()
         return rp, rp.opposite, why1 + why2 + why3 + why4
 
     l1, why1 = l1.rep_and_why()
@@ -2297,14 +2321,15 @@ class Graph:
       return self._get_or_create_ratio_pro_l(l1, l2, l3, l4, deps)
   
   def _set_ratio_pro_equal(
-      self, lp1: Length_Pro, lp2: Length_Pro, lp3: Length_Pro, lp4: Length_Pro, deps=None
+      self, lp1: Length_Pro, lp2: Length_Pro, lp3: Length_Pro, lp4: Length_Pro, dep=None
   ) -> None:
-      rp12, rp21, _ = self._get_or_create_ratio_pro_lp(lp1, lp2, deps)
-      rp34, rp43, _ = self._get_or_create_ratio_pro_lp(lp3, lp4, deps)
+      deps = dep
+      rp12, rp21, _ = self._get_or_create_ratio_pro_lp(lp1, lp2)
+      rp34, rp43, _ = self._get_or_create_ratio_pro_lp(lp3, lp4)
       self.make_equal(rp12, rp34, deps=deps)
       self.make_equal(rp21, rp43, deps=deps)
-      rp13, rp31, _ = self._get_or_create_ratio_pro_lp(lp1, lp3, deps)
-      rp24, rp42, _ = self._get_or_create_ratio_pro_lp(lp2, lp4, deps)
+      rp13, rp31, _ = self._get_or_create_ratio_pro_lp(lp1, lp3)
+      rp24, rp42, _ = self._get_or_create_ratio_pro_lp(lp2, lp4)
       self.make_equal(rp13, rp24, deps=deps)
       self.make_equal(rp31, rp42, deps=deps)
 

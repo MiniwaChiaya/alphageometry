@@ -1,2 +1,6 @@
-_ab_ = 1
-print(_ab_)
+from multiset import Multiset
+
+A = Multiset([1,2,2,3])
+B = Multiset([2,3,4,5])
+
+print(A,B)

@@ -123,7 +123,6 @@ class Node:
 
   def merge_one(self, node: Node, deps: list[Any]) -> None:
     node.rep().set_rep(self.rep())
-
     if node in self.merge_graph:
       return
 

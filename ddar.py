@@ -42,7 +42,6 @@ def saturate_or_goal(
   eq4s = []
   branching = []
   all_added = []
-  max_level = 2
   while len(level_times) < max_level:
     level = len(level_times) + 1
     print(f"hello from {level}")
